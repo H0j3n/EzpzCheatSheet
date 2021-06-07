@@ -1,6 +1,8 @@
 # EzpzCheatSheet
 This CheatSheet will not have much explanation. It just a commands that has been used pwning all of the machines from various platform and something that I have encounter before. Also any notes, CTF and others that help me.
 
+Also, do check this notes here [https://github.com/aniqfakhrul/archives](https://github.com/aniqfakhrul/archives) !
+
 # A. Ports
 
 ### 25 (SMTP)
@@ -735,6 +737,43 @@ getsystem
 
 ```
 
+### PoshC2	
+
+```code
+# Install
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | sudo bash
+
+# Commands (posh)
+posh-project -n <project-name>
+posh-project -d <project-name>
+posh-config
+posh-server <-- This will run the C2 server, which communicates with Implants and receives task output
+posh <-- This will run the ImplantHandler, used to issue commands to the server and implants
+posh-service <-- This will run the C2 server as a service instead of in the foreground
+posh-stop-service <-- This will stop the service
+posh-log <-- This will view the C2 log if the server is already running
+posh -u aniq
+
+# Commands 
+
+
+# References
+https://github.com/nettitude/PoshC2
+https://poshc2.readthedocs.io/en/latest/
+https://github.com/zenosxx/PoshC2
+```
+
+### Pypykatz
+
+```code
+# Intall
+pip3 install pypykatz
+
+# Commands
+pypykatz lsa minidump lsass.dmp
+
+```
+
 ### Crackmapexec
 
 ```code
@@ -839,11 +878,12 @@ Link : https://github.com/BushidoUK/CTI-Lexicon/blob/main/Lexicon.md
 ### Powerview.ps1
 
 ```code
-# Get Domain Computers
+# Commands
 Get-DomainComputer
 Get-DomainComputer -properties name
 Get-DomainTrustMapping -Verbose
 Get-DomainTrust
+(get-domaincomputer -domain bank.local).dnshostname
 
 
 # References
