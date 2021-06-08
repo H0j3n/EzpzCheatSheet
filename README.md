@@ -657,6 +657,22 @@ https://lzone.de/cheat-sheet/jq
 echo "xtest" | cut -c2-
 ```
 
+### PowerShell Commands
+
+```powershell
+# Show Process
+ps
+ps | findstr "something"
+
+# Kill Process
+stop-process -id 500 -force
+
+# Wget
+wget 10.10.10.10/output.txt -outfile output.txt
+
+
+```
+
 ### Bloodhound
 
 ```code
