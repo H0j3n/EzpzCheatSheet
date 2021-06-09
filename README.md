@@ -952,6 +952,17 @@ sudo node -e 'child_process.spawn("/bin/sh", {stdio: [0, 1, 2]})'
 sudo /bin/cat /opt/games/../../../etc/passwd
 ```
 
+### Qpdf
+
+```code
+# Install
+sudo apt install qpdf
+
+# Commands
+qpdf --encrypt password password 40 -- test.pdf test2.pdf
+qpdf --password=password --decrypt test2.pdf test.pdf
+```
+
 ### Snap
 
 ```bash
