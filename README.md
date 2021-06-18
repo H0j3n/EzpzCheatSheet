@@ -640,6 +640,7 @@ https://github.com/unode/firefox_decrypt.git
 ```bash
 # Commands
 sshuttle -vr sshuser@10.10.10.10 192.168.0.1/24
+sshuttle -vr sshuser@10.10.10.10 -e "ssh -i id_rsa" 192.168.0.1/24
 sshuttle -vr sshuser@10.10.10.10 192.168.0.1/16
 ````
 
