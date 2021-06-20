@@ -5,6 +5,13 @@ Also, do check this notes here [https://github.com/aniqfakhrul/archives](https:/
 
 # A. Ports
 
+### 21 (FTP)
+
+```bash
+# Commands
+wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
+```
+
 ### 25 (SMTP)
 
 ```bash
@@ -740,7 +747,17 @@ wget 10.10.10.10/output.txt -outfile output.txt
 # Find file (recursive)
 Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
 
+# View lnk files information
+$sh = New-Object -COM WScript.Shell
+$targetPath = $sh.CreateShortcut('C:\Users\Public\Desktop\shortcut.lnk')
+$targetPath
+```
 
+### Windows Commands
+
+```bash
+# Commands
+cmdkey /list
 ```
 
 ### Bloodhound
@@ -1256,6 +1273,47 @@ https://github.com/SwiftOnSecurity/sysmon-config
 ```bash
 # Commands
 scp -P 2249 file.txt user@10.10.10.:.
+```
+
+### Mdb
+
+```bash
+# Download MdbTools
+sudo apt install mdbtools
+
+# Commands
+mdb-tables file.mdb
+mdb-tables -T backup.mdb
+mdb-sql file.mdb
+	* list tables
+	* go
+	
+# Tricks
+for i in $(mdb-tables -T backup.mdb | cut -d' ' -f2);do mdb-export -H backup.mdb $i > /tmp/test; sed "s/.*(//g" /tmp/test | sed 's/"//g' | sed "s/).*//g" | tr , '\n' >> word.txt;done
+```
+
+### Evolution
+
+```bash
+# Install
+sudo apt-get install evolution evolution-plugins
+
+# Commands
+evolution
+
+# References
+https://rc.partners.org/kb/article/2702
+```
+
+### readpst
+
+```bash
+# Install
+sudo apt-get install -y pst-utils
+
+# Commands
+readpst file.pst
+cat file.mbox
 ```
 
 # C. SUID/CAP/SUDO/GROUP
