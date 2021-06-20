@@ -729,6 +729,8 @@ alias rot13="tr 'A-Za-z' 'N-ZA-Mn-za-m'"
   * echo "a" | rot13
 alias urldecode='sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"'
   * echo 'P%40%24%24w0rd' | urldecode
+alias base64w='iconv --to-code UTF-16LE | base64 -w 0'
+  * echo whoami | base64w
 ```
 
 ### PowerShell Commands
