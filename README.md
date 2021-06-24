@@ -513,6 +513,43 @@ C:/windows/system32/inetsrv/config/schema/ASPNET_schema.xml
 - https://www.c-sharpcorner.com/UploadFile/3d39b4/folder-structure-of-Asp-Net-mvc-project/
 ```
 
+### ASP.NET MVC Folder Structure
+
+```bash
+MyFirstProject
+- Properties
+	- AssemblyInfo.cs
+- App_Data
+	- 
+- App_Start
+	-
+- Content
+	- Site.css
+- Controllers
+	- 
+- fonts
+	-
+- Models
+	- 
+- Scripts
+	- something.js
+- Views
+	- Index.cshtml/Index.aspx/Index.ascx
+	- web.config
+- bin
+	- something.dll
+- Images
+	- 
+- favicon.ico
+- Global.asax
+- packages.config
+- web.config
+
+# References
+- https://www.tutorialsteacher.com/mvc/mvc-folder-structure
+- https://github.com/DLarsen/Learn-ASP.NET-MVC
+```
+
 ### Remote Command Execution (RCE)
 
 ```bash
