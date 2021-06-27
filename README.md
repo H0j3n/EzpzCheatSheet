@@ -1356,7 +1356,7 @@ https://github.com/GhostManager/Ghostwriter
 {% set list_web = ['WEB01','WEB02'] %} 
 
 #=====Example(1) Iteration=====
-{% for x in list__web %}
+{% for x in list_web %}
 	{{ x }}
 {% endfor %}
 
