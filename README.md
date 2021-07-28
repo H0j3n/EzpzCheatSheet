@@ -1970,35 +1970,35 @@ https://github.com/trufflesecurity/truffleHog
 ### GhostWriter 
 
 ```bash
-# Download
-https://github.com/GhostManager/Ghostwriter
+=> Download
+$ https://github.com/GhostManager/Ghostwriter
 
-#=====Take Substring=====
-{{ finding.title[1:6] }}
-{{ finding.title[1:-1] }}
-{{ finding.title[1:] }}
+=> =====Take Substring=====
+$ {{ finding.title[1:6] }}
+$ {{ finding.title[1:-1] }}
+$ {{ finding.title[1:] }}
 
-#=====Set List=====
-{% set list_web = ['WEB01','WEB02'] %} 
+=> =====Set List=====
+$ {% set list_web = ['WEB01','WEB02'] %} 
 
-#=====Example(1) Iteration=====
+=> =====Example(1) Iteration=====
 {% for x in list_web %}
 	{{ x }}
 {% endfor %}
 
-#====Example(2) Iteration====
+=> ====Example(2) Iteration====
 {% for x in list_web %}
     {{ forloop.counter }} # starting index 1
     {{ forloop.counter0 }} # starting index 0
 {% endfor %}
 
-#=====Example(1) IfElse=====
+=> =====Example(1) IfElse=====
 {% if 'web' in x %}
 	yes
 {% endif %}
 
-#====Inside findings====
-# https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/reporting/models.py
+=> ====Inside findings====
+$ https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/reporting/models.py
 {% for findings in findings %}
 	{{ finding.title }}
 	{{ finding.position }}
@@ -2018,8 +2018,8 @@ https://github.com/GhostManager/Ghostwriter
 	{{ finding.report }}
 {% endfor % }
 
-#====Inside target====
-# https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/rolodex/models.py
+=> ====Inside target====
+$  https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f084685b526f0/ghostwriter/rolodex/models.py
 {% for targets in target %}
 	{{ targets.ip_address }}
 	{{ targets.hostname }}
