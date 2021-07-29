@@ -1258,6 +1258,9 @@ $ https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
 => SQL Injection
 $ https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
 
+=> Sensitive Information
+$ https://cwe.mitre.org/data/definitions/200.html
+
 ```
 
 ### PowerShell Commands
