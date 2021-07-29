@@ -1242,7 +1242,7 @@ alias hex='xxd -p'
   * while read line; do echo $line | hex | tr "\n" " " | sed 's/ //g';echo; done < payload.txt
 ```
 
-### Pentest
+### Pentest List
 
 ```bash
 => User Enumeration
