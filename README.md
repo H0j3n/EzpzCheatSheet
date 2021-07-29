@@ -5,50 +5,51 @@ Also, do check this notes here [https://github.com/aniqfakhrul/archives](https:/
 
 # A. Ports
 
-### 21 (FTP)
+### Port 21 (FTP)
 
 ```bash
-# Commands
-wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
+=> Commands
+$ wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
 ```
 
-### 22 (SSH)
+### Port 22 (SSH)
 
 ```bash
-# Commands
-ssh root@10.10.10.10
-ssh root@10.10.10.10 -i id_rsa
+=> Commands
+$ ssh root@10.10.10.10
+$ ssh root@10.10.10.10 -i id_rsa
 
 ```
 
-### 25 (SMTP)
+### Port 25 (SMTP)
 
 ```bash
-# Nmap
+=> Nmap
+$ 
 
-# Enum Users
-smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt -t 10.10.10.10
+=> Enum Users
+$ smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt -t 10.10.10.10
 
-# Swaks (Send Email)
-swaks --to nik@bank.local --from aniq@bank.local --header "Subject: Welcome" --body "Enjoy your stay!" --server 10.10.10.10
+=> Swaks (Send Email)
+$ swaks --to nik@bank.local --from aniq@bank.local --header "Subject: Welcome" --body "Enjoy your stay!" --server 10.10.10.10
 ```
 
-### 53 (DNS)
+### Port 53 (DNS)
 
 ```bash
-# Install
-sudo apt install dnsutils
+=> Install
+$ sudo apt install dnsutils
 
-# Nmap
-nmap -n --script "(default and *dns*) or fcrdns or dns-srv-enum or dns-random-txid or dns-random-srcport" 10.10.10.10
+=> Nmap
+$ nmap -n --script "(default and *dns*) or fcrdns or dns-srv-enum or dns-random-txid or dns-random-srcport" 10.10.10.10
 
-# Nslookup
-nslookup 10.10.10.10
+=> Nslookup
+$ nslookup 10.10.10.10
 	* server 10.10.10.10
 	* 10.10.10.10
 	
-# Host
-host -t ns megacorpone.com
+=> Host
+$ host -t ns megacorpone.com
 
 ```
 
