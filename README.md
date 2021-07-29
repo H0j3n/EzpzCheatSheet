@@ -2037,48 +2037,47 @@ $  https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f
 ### Sqlmap
 
 ```
-# Command
-sqlmap -u "http://example.com/" --data "a=1&b=2&c=3" -p "a,b" --method POST
-sqlmap -u "http://example.com/?a=1&b=2&c=3" -p "a,b"
-sqlmap -r post.req --level=5 --risk=3 --os-shell
+=> Command
+$ sqlmap -u "http://example.com/" --data "a=1&b=2&c=3" -p "a,b" --method POST
+$ sqlmap -u "http://example.com/?a=1&b=2&c=3" -p "a,b"
+$ sqlmap -r post.req --level=5 --risk=3 --os-shell
 ```
 
 ### Nim
 
 ```
-# Download
-https://nim-lang.org/
+=> Download
+$ https://nim-lang.org/
 
-# Commands
-nim c .\practice.nim
+=> Commands
+$ nim c .\practice.nim
 
-# Variables
-var age: int
-var ageSpecified: int = 25
-var variableImplicit = "Hello"
+=> Variables
+$ var age: int
+$ var ageSpecified: int = 25
+$ var variableImplicit = "Hello"
+$ var my_variable != var My_variable
+$ var my_variable == var myVariable
 
-var my_variable != var My_variable
-var my_variable == var myVariable
-
-# Function
-## Void
+=> Function
+  Void
 proc header(): void =
 	echo "here"
 
-# Output
-echo "Age: ", ageSpecified
+=> Output
+$ echo "Age: ", ageSpecified
 
-# Install (Nimble)
-nimble install winim
+=> Install (Nimble)
+$ nimble install winim
 
-# References
-https://github.com/byt3bl33d3r/OffensiveNim
-https://blog.eduonix.com/web-programming-tutorials/nim-programming-language-syntaxes/
-https://ajpc500.github.io/nim/Shellcode-Injection-using-Nim-and-Syscalls/
-https://github.com/ajpc500/NimlineWhispers
-https://gist.github.com/ChoiSG/e0a7f5949638dfe363bcd418d94dcc34
-https://ilankalendarov.github.io/posts/nim-ransomware/
-https://s3cur3th1ssh1t.github.io/Playing-with-OffensiveNim/
+=> References
+$ https://github.com/byt3bl33d3r/OffensiveNim
+$ https://blog.eduonix.com/web-programming-tutorials/nim-programming-language-syntaxes/
+$ https://ajpc500.github.io/nim/Shellcode-Injection-using-Nim-and-Syscalls/
+$ https://github.com/ajpc500/NimlineWhispers
+$ https://gist.github.com/ChoiSG/e0a7f5949638dfe363bcd418d94dcc34
+$ https://ilankalendarov.github.io/posts/nim-ransomware/
+$ https://s3cur3th1ssh1t.github.io/Playing-with-OffensiveNim/
 ```
 
 ### Cs
@@ -2096,15 +2095,15 @@ passPhrase = string.Join("\"" + Environment.NewLine + "\"", passPhrase.Split()
 ### Bypass 403 (Forbidden)
 
 ```bash
-# Tools
-https://github.com/lobuhi/byp4xx
-https://github.com/iamj0ker/bypass-403
+=> Tools
+$ https://github.com/lobuhi/byp4xx
+$ https://github.com/iamj0ker/bypass-403
 
-# Header
-X-Originating-IP: 127.0.0.1 
-X-Forwarded-For: 127.0.0.1 
-X-Remote-IP: 127.0.0.1 
-X-Remote-Addr: 127.0.0.1
+=> Header
+$ X-Originating-IP: 127.0.0.1 
+$ X-Forwarded-For: 127.0.0.1 
+$ X-Remote-IP: 127.0.0.1 
+$ X-Remote-Addr: 127.0.0.1
 ```
 
 ### Mobsfscan
