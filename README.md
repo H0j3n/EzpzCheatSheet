@@ -1260,6 +1260,9 @@ $ https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_
 
 => Sensitive Information
 $ https://cwe.mitre.org/data/definitions/200.html
+$ https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure
+$ https://cwe.mitre.org/data/definitions/359.html
+$ https://cyberintelligencehouse.com/exposure/disclosure-of-sensitive-information-and-exposure-enables-phishing
 
 ```
 
