@@ -1344,16 +1344,16 @@ rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.ex
 ### Bloodhound
 
 ```code
-# Donwloads/Install
-sudo apt-get install bloodhound
+=> Donwloads/Install
+$ sudo apt-get install bloodhound
 
-# Commands
-ne04j console
-neo4j
+=> Commands
+$ ne04j console
+$ neo4j
 
-# Notes
-http://localhost:7474/
-neo4j:neo4j
+=> Notes
+$ http://localhost:7474/
+$ neo4j:neo4j
 
 
 ```
