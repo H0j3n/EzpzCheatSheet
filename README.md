@@ -211,7 +211,7 @@ $ snmpwalk -v1 -c public 10.10.10.10 2
 $ snmpwalk -v 1 -c public 10.10.10.10 NET-SNMP-EXTEND-MIB::nsExtendOutputFull
 $ snmpwalk -m +MY-MIB -v 2c -c public 10.10.10.10 nsExtendObjects
 $ snmpwalk -m +MY-MIB -v 1 -c public 10.10.10.10 nsExtendObjects
-$ snmpwalk -m ALL -v 2c -c public 10.10.10.241 nsExtendObjects
+$ snmpwalk -m ALL -v 2c -c public 10.10.10.10 nsExtendObjects
 
 => Onesixtyone
 $ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
