@@ -1847,6 +1847,21 @@ git commit -am "Done"
 git push origin master
 ```
 
+### Git Commands
+
+```bash
+=> Commands
+git status
+git pull
+git add .
+git commit -m "Update"
+git push
+git stash
+git stash list
+git stash show -p "stash@{0}"
+git stash apply "stash@{0}"
+```
+
 ### Objection
 
 ```bash
@@ -3750,6 +3765,17 @@ wget https://raw.githubusercontent.com/TheRealHetfield/exploits/master/nibbleBlo
 	* Change lhost,lport
 - https://www.exploit-db.com/exploits/49584
 	* Change lhost,lport,rhost,rport (Depends windows version)
+```
+
+### Joomla
+
+```bash
+=> Scanner
+$ 
+
+=> References
+$ https://www.itoctopus.com/how-to-quickly-know-the-version-of-any-joomla-website
+$ https://www.exploit-db.com/docs/english/22763-guidelines-for-pentesting-a-joomla-based-site.pdf
 ```
 
 ### Drupal
