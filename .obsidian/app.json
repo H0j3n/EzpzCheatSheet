@@ -1,5 +1,7 @@
 {
   "autoConvertHtml": false,
   "spellcheck": false,
-  "readableLineLength": false
+  "readableLineLength": true,
+  "legacyEditor": false,
+  "livePreview": true
 }

